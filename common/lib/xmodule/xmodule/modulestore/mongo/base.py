@@ -583,6 +583,8 @@ class MongoModuleStore(ModuleStoreDraftAndPublished, ModuleStoreWriteBase, Mongo
         self._course_run_cache = {}
         self.signal_handler = signal_handler
 
+        self.detached_categories = [name for name, __ in XBlock.load_tagged_classes("detached")]
+
     def close_connections(self):
         """
         Closes any open connections to the underlying database
@@ -933,17 +935,35 @@ class MongoModuleStore(ModuleStoreDraftAndPublished, ModuleStoreWriteBase, Mongo
                 course_key,
                 item,
                 data_cache,
-                apply_cached_metadata=(item['location']['category'] != 'course' or depth != 0),
                 using_descriptor_system=using_descriptor_system
+                apply_cached_metadata=self._should_apply_cached_metadata(item, depth)
             )
             for item in items
         ]
+
+    def _should_apply_cached_metadata(self, item, depth):
+        """
+        Returns a boolean whether a particular query should trigger an application
+        of inherited metadata onto the item
+        """
+        category = item['location']['category']
+        apply_cached_metadata = category not in self.detached_categories and \
+            not (category == 'course' and depth == 0)
+        return apply_cached_metadata
 
     @autoretry_read()
     def get_courses(self, **kwargs):
         '''
         Returns a list of course descriptors.
         '''
+
+        course_org_filter = kwargs.get('course_org_filter')
+
+        if course_org_filter:
+            course_records = self.collection.find({'_id.category': 'course', '_id.org': course_org_filter})
+        else:
+            course_records = self.collection.find({'_id.category': 'course'})
+
         base_list = sum(
             [
                 self._load_items(
@@ -953,7 +973,7 @@ class MongoModuleStore(ModuleStoreDraftAndPublished, ModuleStoreWriteBase, Mongo
                 for course
                 # I tried to add '$and': [{'_id.org': {'$ne': 'edx'}}, {'_id.course': {'$ne': 'templates'}}]
                 # but it didn't do the right thing (it filtered all edx and all templates out)
-                in self.collection.find({'_id.category': 'course'})
+                in course_records
                 if not (  # TODO kill this
                     course['_id']['org'] == 'edx' and
                     course['_id']['course'] == 'templates'
