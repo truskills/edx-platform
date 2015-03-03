@@ -1596,8 +1596,8 @@ class ModuleSystem(MetricsMixin, ConfigurableFragmentWrapper, Runtime):  # pylin
         """provide uniform access to attributes (like etree)"""
         self.__dict__[attr] = val
 
-    def __str__(self):
-        return str(self.__dict__)
+    def __repr__(self):
+        return "{}{}".format(self.__class__.__name__, self.__dict__)
 
     @property
     def ajax_url(self):
