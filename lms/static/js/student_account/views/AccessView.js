@@ -242,6 +242,7 @@ var edx = edx || {};
          */
         enrollment: function() {
             var enrollment = edx.student.account.EnrollmentInterface,
+                purchase = edx.student.account.PurchaseInterface,
                 shoppingcart = edx.student.account.ShoppingCartInterface,
                 redirectUrl = '/dashboard',
                 queryParams = this.queryParams();
@@ -251,7 +252,14 @@ var edx = edx || {};
                 If we need to enroll in a course, mark as enrolled.
                 The enrollment interface will redirect the student once enrollment completes.
                 */
-                enrollment.enroll( decodeURIComponent( queryParams.courseId ) );
+                var courseKey = decodeURIComponent( queryParams.courseId );
+                var courseEnrollmentInfo = enrollment.enrollment_info( courseKey );
+                var sku = this.get_honor_sku( courseEnrollmentInfo );
+                if (sku != null) {
+                    purchase.purchase( sku, courseKey );
+                } else {
+                    enrollment.enroll(courseKey);
+                }
             } else if ( queryParams.enrollmentAction === 'add_to_cart' && queryParams.courseId) {
                 /*
                 If this is a paid course, add it to the shopping cart and redirect
@@ -274,6 +282,26 @@ var edx = edx || {};
                 }
 
                 this.redirect( redirectUrl );
+            }
+        },
+
+        /**
+         * Given a JSON object representing the Course Enrollment Info, check for an honor mode to determine if
+         * the course has a SKU associated with it. If so, it should be available in the Course Catalog. Return
+         * the SKU. Return null if no SKU is found.
+         *
+         * This endpoint is explicitly designed to only support Honor enrollments. No other type of Course Seat should
+         * be fulfilled from the Login or Registration pages.
+         *
+         * @param courseEnrollmentInfo The JSON object representing Course Enrollment Info.
+         * @return {string} The SKU if found. Null otherwise.
+         */
+        get_honor_sku: function( courseEnrollmentInfo ) {
+            var mode = {};
+            for (mode in courseEnrollmentInfo.course_modes) {
+                if (mode.mode == 'honor' && mode.sku != null) {
+                    return mode.sku;
+                }
             }
         },
 

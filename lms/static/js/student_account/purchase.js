@@ -6,12 +6,10 @@ var edx = edx || {};
     edx.student = edx.student || {};
     edx.student.account = edx.student.account || {};
 
-    edx.student.account.EnrollmentInterface = {
+    edx.student.account.PurchaseInterface = {
 
         urls: {
-            enrollment: '/api/enrollment/v1/enrollment',
-            enrollmentInfo: 'api/enrollment/v1/course',
-            trackSelection: '/course_modes/choose/'
+            purchase: '/api/purchase/v0/purchase'
         },
 
         headers: {
@@ -19,41 +17,18 @@ var edx = edx || {};
         },
 
         /**
-         * Get the Course Enrollment Info for a course. This can be used to describe what options are available
-         * for enrolling in a course, including all available course modes, start and end dates, and SKUs mapping
-         * to the Course Catalog. This information can be used to determine how an enrollment should be fulfilled.
-         *
-         * @param {string} courseKey Slash-separated course key
-         * @returns The enrollment information for a course.
+         * Create a purchase for a course seat with an honor certificate, then redirect the user to the track selection
+         * page.
+         * @param  {string} sku The SKU for the product
+         * @param  {string} courseKey The Slash-Separated Course Key.
          */
-        enrollment_info: function( courseKey ) {
-            var data = JSON.stringify(data_obj);
-            return $.ajax({
-                url: this.enrollmentInfoUrl( courseKey ),
-                type: 'GET',
-                contentType: 'application/json; charset=utf-8',
-                headers: this.headers,
-                context: this
-            })
-            .done(function( jqXHR ) {
-                return JSON.parse(jqXHR.responseText);
-            });
-        },
-
-        /**
-         * Enroll a user in a course, then redirect the user
-         * to the track selection page.
-         * @param  {string} courseKey  Slash-separated course key.
-         */
-        enroll: function( courseKey ) {
+        purchase: function( sku, courseKey ) {
             var data_obj = {
-                course_details: {
-                    course_id: courseKey
-                }
+                sku: sku
             };
             var data = JSON.stringify(data_obj);
             $.ajax({
-                url: this.urls.enrollment,
+                url: this.urls.purchase,
                 type: 'POST',
                 contentType: 'application/json; charset=utf-8',
                 data: data,
@@ -81,15 +56,6 @@ var edx = edx || {};
                 // page to allow the user to choose a paid enrollment mode.
                 this.redirect( this.trackSelectionUrl( courseKey ) );
             });
-        },
-
-        /**
-         * Construct the URL for the Enrollment Info Endpoint.
-         * @param courseKey The slash-separated course key.
-         * @returns {string} The URL to get course level enrollment info.
-         */
-        enrollmentInfoUrl: function ( courseKey ) {
-            return this.urls.enrollmentInfo + courseKey;
         },
 
         /**
