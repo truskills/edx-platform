@@ -9,7 +9,7 @@ var edx = edx || {};
     edx.student.account.PurchaseInterface = {
 
         urls: {
-            purchase: '/api/purchase/v0/purchase'
+            purchase: 'http://localhost:8002/purchase'
         },
 
         headers: {
