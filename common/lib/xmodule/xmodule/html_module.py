@@ -18,6 +18,7 @@ from xmodule.contentstore.content import StaticContent
 from xblock.core import XBlock
 from xmodule.edxnotes_utils import edxnotes
 from xmodule.annotator_mixin import html_to_text
+from xmodule.mixin import LicenseMixin
 import re
 
 log = logging.getLogger("edx.courseware")
@@ -86,7 +87,7 @@ class HtmlModule(HtmlModuleMixin):
     pass
 
 
-class HtmlDescriptor(HtmlFields, XmlDescriptor, EditingDescriptor):
+class HtmlDescriptor(HtmlFields, XmlDescriptor, EditingDescriptor, LicenseMixin):
     """
     Module for putting raw html in a course
     """

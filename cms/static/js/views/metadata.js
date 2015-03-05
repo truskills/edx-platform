@@ -550,5 +550,199 @@ function(BaseView, _, MetadataModel, AbstractEditor, FileUpload, UploadDialog, V
         }
     });
 
+    var defaultLicenseInfo = {
+      "all-rights-reserved": {
+        "name": gettext("All Rights Reserved"),
+        "tooltip": gettext("You reserve all rights for your work")
+      },
+      "creative-commons": {
+        "name": gettext("Creative Commons"),
+        "tooltip": gettext("You waive some rights for your work, such that others can use it too"),
+        "url": "//creativecommons.org/about",
+        "options": {
+          "ver": {
+            "name": gettext("Version"),
+            "type": "string",
+            "default": "4.0",
+          },
+          "BY": {
+            "name": gettext("Attribution"),
+            "type": "boolean",
+            "default": true,
+            "help": gettext("Allow others to copy, distribute, display and perform " +
+              "your copyrighted work but only if they give credit the way you request."),
+          },
+          "NC": {
+            "name": gettext("Noncommercial"),
+            "type": "boolean",
+            "default": true,
+            "help": gettext("Allow others to copy, distribute, display and perform " +
+              "your work - and derivative works based upon it - but for noncommercial purposes only."),
+          },
+          "ND": {
+            "name": gettext("No Derivatives"),
+            "type": "boolean",
+            "default": true,
+            "help": gettext("Allow others to copy, distribute, display and perform " +
+              "only verbatim copies of your work, not derivative works based upon it."),
+            "conflictsWith": ["SA"]
+          },
+          "SA": {
+            "name": gettext("Share Alike"),
+            "type": "boolean",
+            "default": false,
+            "help": gettext("Allow others to distribute derivative works only under " +
+              "a license identical to the license that governs your work."),
+            "conflictsWith": ["ND"]
+          }
+        },
+        "option_order": ["BY", "NC", "ND", "SA"]
+      }
+    }
+
+    Metadata.License = AbstractEditor.extend({
+        events: {
+            "click ul.license-types li" : "onLicenseClick",
+            "click ul.license-options li": "onOptionClick"
+        },
+
+        initialize: function(options) {
+            this.licenseInfo = options.licenseInfo || defaultLicenseInfo;
+            this.template = this.loadTemplate("license-selector-tpl");
+
+            // Rerender when the model's license changes
+            this.listenTo(this.model, 'change:value', this.render);
+            this.render();
+        },
+
+        getDefaultOptionsForLicenseType: function(licenseType) {
+          if (!this.licenseInfo[licenseType]) {
+            // custom license type, no options
+            return {};
+          }
+          if (!this.licenseInfo[licenseType].options) {
+            // defined license type without options
+            return {};
+          }
+          var defaults = {};
+          _.each(this.licenseInfo[licenseType].options, function(value, key) {
+            defaults[key] = value.default;
+          })
+          return defaults;
+        },
+
+        /**
+         * returns structured information about the stringifed license
+         *
+         * parseLicense("creative-commons: BY NC ver=4.0")
+         * {
+         *   "type": "creative-commons",
+         *   "options": {
+         *     "ver": "4.0",
+         *     "BY": true,
+         *     "NC": true
+         *   }
+         * }
+         */
+        parseLicense: function(license) {
+          if(!license) {
+            return {"type": null, "options": {}}
+          }
+
+          var licenseType, options = {};
+
+          var colonIndex = license.indexOf(":");
+          if (colonIndex == -1) {
+            licenseType = license;
+            options = this.getDefaultOptionsForLicenseType(licenseType);
+          } else {
+            licenseType = license.substring(0, colonIndex);
+            var optStr = license.substring(colonIndex + 1);
+            _.each(optStr.split(" "), function(opt) {
+              if (_.isEmpty(opt)) {
+                return;
+              }
+              var eqIndex = opt.indexOf("=");
+              if(eqIndex == -1) {
+                // this is a boolean flag
+                options[opt] = true;
+              } else {
+                // this is a key-value pair
+                var optKey = opt.substring(0, eqIndex);
+                var optVal = opt.substring(eqIndex + 1);
+                options[optKey] = optVal;
+              }
+            });
+          }
+          return {"type": licenseType, "options": options};
+        },
+
+        getLicense: function() {
+          return this.parseLicense(this.model.getValue());
+        },
+
+        setLicense: function(obj) {
+          // if we're passed a string, just set it
+          if (_.isString(obj)) {
+            return this.model.setValue(obj);
+          }
+          // if we don't have options, just set the `type` property
+          if (!obj.options || _.isEmpty(obj.options)) {
+            return this.model.setValue(obj.type || null);
+          }
+
+          // options are where it gets tricky
+          var optStrs = _.map(obj.options, function (value, key) {
+            if(_.isBoolean(value)) {
+              return value ? key : null
+            } else {
+              return key + "=" + value
+            }
+          });
+          // filter out nulls
+          optStrs = _.filter(optStrs, _.identity);
+          var licenseStr = obj.type + ": " + optStrs.join(" ")
+          this.model.setValue(licenseStr);
+        },
+
+        render: function() {
+            this.$el.html(this.template({
+                model: this.model.attributes,
+                licenseInfo: this.licenseInfo,
+                parsed: this.getLicense()
+            }));
+            return this;
+        },
+
+        onLicenseClick: function(e) {
+            var $li = $(e.srcElement || e.target).closest('li');
+            this.setLicense($li.data("license"))
+        },
+
+        onOptionClick: function(e) {
+            var $li = $(e.srcElement || e.target).closest('li');
+            var optionKey = $li.data("option")
+            var license = this.getLicense()
+            var licenseInfo = this.licenseInfo[license.type];
+            var optionInfo = licenseInfo.options[optionKey];
+            var currentOptionValue = license.options[optionKey];
+            if (optionInfo.type === "boolean") {
+                // toggle current value
+                currentOptionValue = !currentOptionValue;
+                license.options[optionKey] = currentOptionValue;
+            }
+            // check for conflicts
+            if (currentOptionValue && optionInfo.conflictsWith &&
+                _.any(optionInfo.conflictsWith, function (key) { return license.options[key];})) {
+              // conflict! don't set
+              // need some feedback here
+              return
+            } else {
+              this.setLicense(license);
+            }
+        }
+
+    });
+
     return Metadata;
 });

@@ -1,0 +1,63 @@
+<div class="wrapper-license-types">
+  <label class="label setting-label" for="list-license-types">
+    <%- model.display_name %>
+  </label>
+  <ul class="license-types" id="list-license-types">
+    <% var learn_more_tpl = gettext("{link_start}Learn more{link_end} about {license_name}"); %>
+    <% var link_start_tpl = '<a href="{url}" target="_blank">'; %>
+    <% _.each(licenseInfo, function(license, licenseType) { %>
+      <li class="action license-button
+                <% if(parsed.type === licenseType) { print("is-selected"); } %>"
+              data-license="<%- licenseType %>" name="license-<%- licenseType %>"
+      >
+        <button name="license-<%- licenseType %>"
+            <% if (license.tooltip) { %>data-tooltip="<%- license.tooltip %>"<% } %>>
+          <%- license.name %>
+        </button>
+        <% if(license.url) { %>
+          <p class='tip'>
+            <%= learn_more_tpl
+                    .replace("{link_start}", link_start_tpl.replace("{url}", license.url))
+                    .replace("{link_end}", "</a>")
+                    .replace("{license_name}", license.name) %>
+          </p>
+        <% } %>
+      </li>
+    <% }) %>
+  </ul>
+</div>
+
+<% var license = licenseInfo[parsed.type]; %>
+<% if(license && !_.isEmpty(license.options)) { %>
+  <div class="wrapper-license-options">
+    <label class="label setting-label">
+      <%- gettext("Options for {license_name}").replace("{license_name}", license.name) %>
+    </label>
+    <p class='tip tip-inline'>
+      <%- gettext("The following options are available the {license_name} license.")
+            .replace("{license_name}", license.name) %>
+    </p>
+    <ul class="license-options">
+      <% _.each(license.option_order, function(optionKey) { %>
+        <% var optionInfo = license.options[optionKey]; %>
+        <% if (optionInfo.type == "boolean") { %>
+          <% var optionSelected = parsed.options[optionKey]; %>
+          <li data-option="<%- optionKey %>"
+              class="action-item license-button <% if (optionSelected) { print("is-selected"); } %>"
+          >
+            <i class="fa fa-fw
+               <% if(optionSelected) { print("fa-check-square-o"); } else { print("fa-square-o"); } %>
+               <% if(optionInfo.conflictsWith &&
+                     _.any(optionInfo.conflictsWith, function(key) {return parsed.options[key];})) {
+                        print("disabled");
+                  }
+               %>
+               "></i>
+            <h4 class="option-name"><%- optionInfo.name %></h4>
+            <div class="explanation"><%- optionInfo.help %></div>
+          </li>
+        <% } // could implement other types here %>
+      <% }) %>
+    </ul>
+  </div>
+<% } %>
