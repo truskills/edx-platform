@@ -27,8 +27,9 @@ class @Problem
     problem_prefix = @element_id.replace(/problem_/,'')
     @inputs = @$("[id^='input_#{problem_prefix}_']")
     @$('div.action input:button').click @refreshAnswers
-    @checkButton = @$('div.action input.check')
-    @checkButtonCheckText = @checkButton.val()
+    @$('div.action button.check').click @refreshAnswers
+    @checkButton = @$('div.action button.check')
+    @checkButtonCheckText = @checkButton.text()
     @checkButtonCheckingText = @checkButton.data('checking')
     @checkButton.click @check_fd
     @$('div.action input.reset').click @reset
@@ -315,7 +316,7 @@ class @Problem
           @updateProgress response
           if @el.hasClass 'showed'
             @el.removeClass 'showed'
-          @$('div.action input.check').focus()
+          @$('div.action button.check').focus()
         else
           @gentle_alert response.success
       Logger.log 'problem_graded', [@answers, response.contents], @id
@@ -680,11 +681,11 @@ class @Problem
     if enable
       @checkButton.removeClass 'is-disabled'
       @checkButton.attr({'aria-disabled': 'false'})
-      @checkButton.val(@checkButtonCheckText)
+      @checkButton.text(@checkButtonCheckText)
     else
       @checkButton.addClass 'is-disabled'
       @checkButton.attr({'aria-disabled': 'true'})
-      @checkButton.val(@checkButtonCheckingText)
+      @checkButton.text(@checkButtonCheckingText)
 
   enableCheckButtonAfterResponse: =>
     @has_response = true

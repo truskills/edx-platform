@@ -56,8 +56,11 @@ describe 'Problem', ->
     it 'bind answer refresh on button click', ->
       expect($('div.action input:button')).toHandleWith 'click', @problem.refreshAnswers
 
+    it 'bind answer refresh on check button click', ->
+      expect($('div.action button.check')).toHandleWith 'click', @problem.refreshAnswers
+
     it 'bind the check button', ->
-      expect($('div.action input.check')).toHandleWith 'click', @problem.check_fd
+      expect($('div.action button.check')).toHandleWith 'click', @problem.check_fd
 
     it 'bind the reset button', ->
       expect($('div.action input.reset')).toHandleWith 'click', @problem.reset
@@ -86,7 +89,7 @@ describe 'Problem', ->
       $(@).html readFixtures('problem_content_1240.html')
 
     it 'bind the check button', ->
-      expect($('div.action input.check')).toHandleWith 'click', @problem.check_fd
+      expect($('div.action button.check')).toHandleWith 'click', @problem.check_fd
 
     it 'bind the show button', ->
       expect($('div.action button.show')).toHandleWith 'click', @problem.show
