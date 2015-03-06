@@ -26,15 +26,14 @@ class @Problem
 
     problem_prefix = @element_id.replace(/problem_/,'')
     @inputs = @$("[id^='input_#{problem_prefix}_']")
-    @$('div.action input:button').click @refreshAnswers
-    @$('div.action button.check').click @refreshAnswers
+    @$('div.action button').click @refreshAnswers
     @checkButton = @$('div.action button.check')
     @checkButtonCheckText = @checkButton.text()
     @checkButtonCheckingText = @checkButton.data('checking')
     @checkButton.click @check_fd
-    @$('div.action input.reset').click @reset
+    @$('div.action button.reset').click @reset
     @$('div.action button.show').click @show
-    @$('div.action input.save').click @save
+    @$('div.action button.save').click @save
     # Accessibility helper for sighted keyboard users to show <clarification> tooltips on focus:
     @$('.clarification').focus (ev) =>
       icon = $(ev.target).children "i"

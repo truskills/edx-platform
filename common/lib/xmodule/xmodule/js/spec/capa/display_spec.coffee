@@ -63,13 +63,13 @@ describe 'Problem', ->
       expect($('div.action button.check')).toHandleWith 'click', @problem.check_fd
 
     it 'bind the reset button', ->
-      expect($('div.action input.reset')).toHandleWith 'click', @problem.reset
+      expect($('div.action button.reset')).toHandleWith 'click', @problem.reset
 
     it 'bind the show button', ->
       expect($('div.action button.show')).toHandleWith 'click', @problem.show
 
     it 'bind the save button', ->
-      expect($('div.action input.save')).toHandleWith 'click', @problem.save
+      expect($('div.action button.save')).toHandleWith 'click', @problem.save
 
     it 'bind the math input', ->
       expect($('input.math')).toHandleWith 'keyup', @problem.refreshMath

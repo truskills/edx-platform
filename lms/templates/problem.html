@@ -17,10 +17,10 @@
     <button class="check ${ check_button }" data-checking="${ check_button_checking }">${ check_button }<span class="sr"> ${_("your answer")}</span></button>
     % endif
     % if reset_button:
-    <input class="reset" type="button" value="${_('Reset')}" />
+    <button class="reset">${_('Reset')}<span class="sr"> ${_("your answer")}</span></button>
     % endif
     % if save_button:
-    <input class="save" type="button" value="${_('Save')}" />
+    <button class="save">${_('Save')}<span class="sr"> ${_("your answer")}</span></button>
     % endif
     % if answer_available:
     <button class="show"><span class="show-label">${_('Show Answer')}</span> <span class="sr">${_("Reveal Answer")}</span></button>
