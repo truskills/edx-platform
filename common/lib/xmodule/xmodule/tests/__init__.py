@@ -12,6 +12,7 @@ import os
 import pprint
 import unittest
 import inspect
+import mock
 
 from contextlib import contextmanager
 from lazy import lazy
@@ -56,7 +57,8 @@ class TestModuleSystem(ModuleSystem):  # pylint: disable=abstract-method
     """
     ModuleSystem for testing
     """
-    def __init__(self, **kwargs):
+    @mock.patch('eventtracking.tracker.emit')
+    def __init__(self, mock_emit, **kwargs):  # pylint: disable=unused-argument
         id_manager = CourseLocationManager(kwargs['course_id'])
         kwargs.setdefault('id_reader', id_manager)
         kwargs.setdefault('id_generator', id_manager)
