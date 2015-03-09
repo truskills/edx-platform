@@ -97,6 +97,8 @@ from contentstore.utils import reverse_usage_url
                 <div class="status-release">
                     <h2 class="status-release-label">${_("Course Start Date:")}</h2>
                     <p class="status-release-value">${course_release_date}</p>
+                    <h2 class="license-label">${_("License")}</h2>
+                    <p class="license-value"><%include file="license.html" args="license=context_course.license" /></p>
 
                     <ul class="status-actions">
                       <li class="action-item action-edit">

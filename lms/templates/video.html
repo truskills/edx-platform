@@ -106,6 +106,9 @@
 
     <div class="focus_grabber last"></div>
   <ul class="wrapper-downloads">
+    % if license:
+        <li class="license"><%include file="license.html" args="license=license" /></li>
+    % endif
     % if download_video_link:
         <li class="video-sources video-download-button">
             <a href="${download_video_link}">${_('Download video')}</a>
