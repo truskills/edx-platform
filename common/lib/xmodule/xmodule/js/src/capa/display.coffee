@@ -28,7 +28,8 @@ class @Problem
     @inputs = @$("[id^='input_#{problem_prefix}_']")
     @$('div.action button').click @refreshAnswers
     @checkButton = @$('div.action button.check')
-    @checkButtonCheckText = @checkButton.text()
+    @checkButtonLabel = @$('div.action button.check span.check-label')
+    @checkButtonCheckText = @checkButtonLabel.text()
     @checkButtonCheckingText = @checkButton.data('checking')
     @checkButton.click @check_fd
     @$('div.action button.reset').click @reset
@@ -680,11 +681,11 @@ class @Problem
     if enable
       @checkButton.removeClass 'is-disabled'
       @checkButton.attr({'aria-disabled': 'false'})
-      @checkButton.text(@checkButtonCheckText)
+      @checkButtonLabel.text(@checkButtonCheckText)
     else
       @checkButton.addClass 'is-disabled'
       @checkButton.attr({'aria-disabled': 'true'})
-      @checkButton.text(@checkButtonCheckingText)
+      @checkButtonLabel.text(@checkButtonCheckingText)
 
   enableCheckButtonAfterResponse: =>
     @has_response = true
