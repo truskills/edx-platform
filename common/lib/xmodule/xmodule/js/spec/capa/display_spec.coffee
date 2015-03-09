@@ -54,10 +54,7 @@ describe 'Problem', ->
       expect(window.update_schematics).toHaveBeenCalled()
 
     it 'bind answer refresh on button click', ->
-      expect($('div.action input:button')).toHandleWith 'click', @problem.refreshAnswers
-
-    it 'bind answer refresh on check button click', ->
-      expect($('div.action button.check')).toHandleWith 'click', @problem.refreshAnswers
+      expect($('div.action button')).toHandleWith 'click', @problem.refreshAnswers
 
     it 'bind the check button', ->
       expect($('div.action button.check')).toHandleWith 'click', @problem.check_fd
