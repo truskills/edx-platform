@@ -35,7 +35,7 @@
       <%- gettext("Options for {license_name}").replace("{license_name}", license.name) %>
     </label>
     <p class='tip tip-inline'>
-      <%- gettext("The following options are available the {license_name} license.")
+      <%- gettext("The following options are available for the {license_name} license.")
             .replace("{license_name}", license.name) %>
     </p>
     <ul class="license-options">

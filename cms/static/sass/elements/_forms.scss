@@ -210,6 +210,9 @@ ul.license-types {
   }
 }
 .wrapper-license-options {
+  .tip {
+    @extend %t-copy-sub2;
+  }
   ul.license-options {
     li {
       line-height: 1.5;
