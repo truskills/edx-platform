@@ -6,21 +6,22 @@
     <% var learn_more_tpl = gettext("{link_start}Learn more{link_end} about {license_name}"); %>
     <% var link_start_tpl = '<a href="{url}" target="_blank">'; %>
     <% _.each(licenseInfo, function(license, licenseType) { %>
-      <li class="action license-button
+      <li data-license="<%- licenseType %>">
+        <button name="license-<%- licenseType %>" class="action license-button
                 <% if(parsed.type === licenseType) { print("is-selected"); } %>"
-              data-license="<%- licenseType %>" name="license-<%- licenseType %>"
-      >
-        <button name="license-<%- licenseType %>"
+              name="license-<%- licenseType %>"
             <% if (license.tooltip) { %>data-tooltip="<%- license.tooltip %>"<% } %>>
           <%- license.name %>
         </button>
         <% if(license.url) { %>
-          <p class='tip'>
+          <p class="tip">
             <%= learn_more_tpl
                     .replace("{link_start}", link_start_tpl.replace("{url}", license.url))
                     .replace("{link_end}", "</a>")
                     .replace("{license_name}", license.name) %>
           </p>
+        <% } else { %>
+          <p class="tip">&nbsp;</p>
         <% } %>
       </li>
     <% }) %>
@@ -43,13 +44,13 @@
         <% if (optionInfo.type == "boolean") { %>
           <% var optionSelected = parsed.options[optionKey]; %>
           <li data-option="<%- optionKey %>"
-              class="action-item license-button <% if (optionSelected) { print("is-selected"); } %>"
+              class="action-item license-button is-clickable <% if (optionSelected) { print("is-selected"); } %>"
           >
             <i class="fa fa-fw
                <% if(optionSelected) { print("fa-check-square-o"); } else { print("fa-square-o"); } %>
                <% if(optionInfo.conflictsWith &&
                      _.any(optionInfo.conflictsWith, function(key) {return parsed.options[key];})) {
-                        print("disabled");
+                        print("is-disabled");
                   }
                %>
                "></i>

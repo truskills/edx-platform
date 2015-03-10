@@ -602,7 +602,7 @@ function(BaseView, _, MetadataModel, AbstractEditor, FileUpload, UploadDialog, V
 
     Metadata.License = AbstractEditor.extend({
         events: {
-            "click ul.license-types li" : "onLicenseClick",
+            "click ul.license-types li button" : "onLicenseClick",
             "click ul.license-options li": "onOptionClick"
         },
 
