@@ -131,11 +131,11 @@ def press_the_button_with_label(_step, buttonname):
 
 @step(u'The "([^"]*)" button does( not)? appear')
 def action_button_present(_step, buttonname, doesnt_appear):
-    button_css = 'div.action button span:first-child'
+    button_css = 'div.action button[data-value*="%s"]' % buttonname
     if bool(doesnt_appear):
         assert world.is_css_not_present(button_css)
     else:
-        assert world.css_has_text(button_css, buttonname)
+        assert world.is_css_present(button_css)
 
 
 @step(u'the Show/Hide button label is "([^"]*)"$')
