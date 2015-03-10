@@ -43,16 +43,17 @@
         <% var optionInfo = license.options[optionKey]; %>
         <% if (optionInfo.type == "boolean") { %>
           <% var optionSelected = parsed.options[optionKey]; %>
+          <% var optionDisabled = optionInfo.required ||
+              (optionInfo.conflictsWith && _.any(optionInfo.conflictsWith, function(key) {return parsed.options[key];}));
+          %>
           <li data-option="<%- optionKey %>"
-              class="action-item license-button is-clickable <% if (optionSelected) { print("is-selected"); } %>"
+              class="action-item license-button
+                     <% if (optionSelected) { print("is-selected"); } %>
+                     <% if (optionDisabled) { print("is-disabled"); } else { print("is-clickable"); } %>"
           >
             <i class="fa fa-fw
                <% if(optionSelected) { print("fa-check-square-o"); } else { print("fa-square-o"); } %>
-               <% if(optionInfo.conflictsWith &&
-                     _.any(optionInfo.conflictsWith, function(key) {return parsed.options[key];})) {
-                        print("is-disabled");
-                  }
-               %>
+               <% if(optionDisabled) { print("is-disabled"); } %>
                "></i>
             <h4 class="option-name"><%- optionInfo.name %></h4>
             <div class="explanation"><%- optionInfo.help %></div>

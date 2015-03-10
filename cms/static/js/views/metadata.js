@@ -571,6 +571,7 @@ function(BaseView, _, MetadataModel, AbstractEditor, FileUpload, UploadDialog, V
             "default": true,
             "help": gettext("Allow others to copy, distribute, display and perform " +
               "your copyrighted work but only if they give credit the way you request."),
+            "required": true,
           },
           "NC": {
             "name": gettext("Noncommercial"),
