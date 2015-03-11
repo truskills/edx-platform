@@ -40,6 +40,28 @@ MOCK_MODULES = [
     'opaque_keys.edx.locator',
     'LibraryLocator',
     'Location',
+    'ipware',
+    'ip',
+    'ipware.ip',
+    'get_ip',
+    'pygeoip',
+    'ipaddr',
+    'django_countries',
+    'fields',
+    'django_countries.fields',
+    'opaque_keys',
+    'opaque_keys.edx',
+    'opaque_keys.edx.keys',
+    'CourseKey',
+    'UsageKey',
+    'BlockTypeKey',
+    'opaque_keys.edx.locations',
+    'SlashSeparatedCourseKey',
+    'Locator',
+    'south',
+    'modelsinspector',
+    'south.modelsinspector',
+    'add_introspection_rules'
 ]
 
 for mod_name in MOCK_MODULES:
@@ -73,6 +95,7 @@ if not on_rtd:  # only import and set the theme if we're building docs locally
 root = path('../../../..').abspath()
 sys.path.insert(0, root)
 sys.path.append(root / "common/lib/xmodule")
+sys.path.append(root / "common/djangoapps")
 sys.path.append(root / "lms/djangoapps")
 sys.path.append(root / "lms/djangoapps/mobile_api")
 sys.path.append(root / "lms/djangoapps/mobile_api/course_info")
