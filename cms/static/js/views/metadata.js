@@ -717,7 +717,10 @@ function(BaseView, _, MetadataModel, AbstractEditor, FileUpload, UploadDialog, V
 
         onLicenseClick: function(e) {
             var $li = $(e.srcElement || e.target).closest('li');
-            this.setLicense($li.data("license"))
+            var license = {};
+            license.type = $li.data("license");
+            license.options = this.getDefaultOptionsForLicenseType(license.type);
+            this.setLicense(license);
         },
 
         onOptionClick: function(e) {

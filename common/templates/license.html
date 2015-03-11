@@ -25,7 +25,7 @@ def parse_license(lic):
     © All Rights Reserved
 % elif license_type == "creative-commons":
     <%
-    possible = ["by", "nc" "nd", "sa"]
+    possible = ["by", "nc", "nd", "sa"]
     enabled = [opt for opt in possible
                if license_options.get(opt) or license_options.get(opt.upper())]
     version = license_options.get("ver", "4.0")
