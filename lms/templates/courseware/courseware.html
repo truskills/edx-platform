@@ -231,6 +231,12 @@ ${fragment.foot_html()}
           % endif
         </nav>
       </div>
+
+      % if settings.FEATURES.get("license", True):
+      <div class="course-license" data-tooltip="License for course content">
+        <%include file="../license.html" args="license=course.license" />
+      </div>
+      % endif
     </div>
 % endif
     <section class="course-content" id="course-content">

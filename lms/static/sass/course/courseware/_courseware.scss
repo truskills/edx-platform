@@ -42,6 +42,14 @@ html.video-fullscreen{
 div.course-wrapper {
   position: relative;
 
+  .course-license {
+    position: absolute;
+    margin: 5px auto;
+    bottom: 0;
+    text-align: center;
+    width: 100%
+  }
+
   section.course-content {
     @extend .content;
     padding: 40px;

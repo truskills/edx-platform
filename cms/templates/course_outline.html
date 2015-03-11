@@ -108,10 +108,13 @@ from contentstore.utils import reverse_usage_url
                     </ul>
                 </div>
             </div>
+
+            % if settings.FEATURES.get("LICENSING"):
             <div class="course-license">
                 <h2 class="license-label">${_("License:")}</h2>
                 <p class="license-value"><%include file="license.html" args="license=context_course.license" /></p>
             </div>
+            % endif
 
             <div class="wrapper-dnd">
                 <%
