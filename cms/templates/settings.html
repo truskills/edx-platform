@@ -31,12 +31,6 @@ CMS.URL.UPLOAD_ASSET = '${upload_asset_url}';
     require(["js/factories/settings"], function(SettingsFactory) {
         SettingsFactory("${details_url}");
     });
-    require(["js/views/metadata", "js/models/metadata"], function(MetadataView, MetadataModel) {
-        new MetadataView.License({
-          model: new MetadataModel(),
-          el: $("#course-license-selector").get(),
-        });
-    });
 </%block>
 
 <%block name="content">
