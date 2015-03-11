@@ -61,7 +61,40 @@ MOCK_MODULES = [
     'south',
     'modelsinspector',
     'south.modelsinspector',
-    'add_introspection_rules'
+    'add_introspection_rules',
+    'courseware',
+    'access',
+    'courseware.access',
+    'is_mobile_available_for_user',
+    'courseware.model_data',
+    'courseware.module_render',
+    'courseware.views',
+    'util.request',
+    'eventtracking',
+    'xmodule',
+    'xmodule.exceptions',
+    'xmodule.modulestore',  
+    'xmodule.modulestore.exceptions',
+    'xmodule.modulestore.django',
+    'courseware.models',
+    'milestones',
+    'milestones.api',
+    'milestones.models',
+    'milestones.exceptions',
+    'ratelimitbackend',
+    'analytics',
+    'courseware.courses',
+    'staticfiles',
+    'storage',
+    'staticfiles.storage',
+    'content',
+    'xmodule.contentstore',
+    'xmodule.contentstore.content',
+    'xblock.exceptions',
+    'xmodule.seq_module',
+    'xmodule.vertical_module',
+    'xmodule.x_module'
+    
 ]
 
 for mod_name in MOCK_MODULES:
@@ -128,7 +161,7 @@ extensions = [
     'sphinx.ext.todo', 'sphinx.ext.coverage', 'sphinx.ext.pngmath',
     'sphinx.ext.mathjax', 'sphinx.ext.viewcode', 'sphinxcontrib.napoleon']
 
-project = u'edX Platform API Version 0.5 Alpha'
+project = u'edX Platform APIs'
 copyright = u'2015, edX'
 
 exclude_patterns = ['build', 'links.rst']
