@@ -232,7 +232,7 @@ ${fragment.foot_html()}
         </nav>
       </div>
 
-      % if settings.FEATURES.get("license", True):
+      % if settings.FEATURES.get("LICENSING", False):
       <div class="course-license" data-tooltip="License for course content">
         <%include file="../license.html" args="license=course.license" />
       </div>

@@ -331,7 +331,7 @@ CMS.URL.UPLOAD_ASSET = '${upload_asset_url}';
             </section>
           % endif
 
-          % if settings.FEATURES.get("LICENSING", True):
+          % if settings.FEATURES.get("LICENSING", False):
             <hr class="divide" />
 
             <section class="group-settings license">

@@ -1,4 +1,7 @@
-<%! from django.utils.translation import ugettext as _ %>
+<%!
+from django.utils.translation import ugettext as _
+from django.conf import settings
+%>
 
 % if display_name is not UNDEFINED and display_name is not None:
     <h2>${display_name}</h2>
@@ -106,7 +109,7 @@
 
     <div class="focus_grabber last"></div>
   <ul class="wrapper-downloads">
-    % if license:
+    % if settings.FEATURES.get("LICENSING", False) and license:
         <li class="license"><%include file="license.html" args="license=license" /></li>
     % endif
     % if download_video_link:
