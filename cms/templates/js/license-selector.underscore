@@ -11,10 +11,11 @@
       </button>
       <p class="tip">
         <% if(license.url) { %>
-          <%= learn_more_tpl
-                  .replace("{link_start}", link_start_tpl.replace("{url}", license.url))
-                  .replace("{link_end}", "</a>")
-                  .replace("{license_name}", license.name) %>
+          <a href="<%- license.url %>" target="_blank">
+            <%= gettext("Learn more about {license_name}")
+                  .replace("{license_name}", license.name)
+            %>
+          </a>
         <% } else { %>
           &nbsp;
         <% } %>
