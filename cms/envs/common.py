@@ -143,6 +143,8 @@ FEATURES = {
 
     # Enable course reruns, which will always use the split modulestore
     'ALLOW_COURSE_RERUNS': True,
+
+    'LICENSING': True,
 }
 
 ENABLE_JASMINE = False

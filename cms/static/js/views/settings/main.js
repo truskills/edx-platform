@@ -1,7 +1,7 @@
 define(["js/views/validation", "codemirror", "underscore", "jquery", "jquery.ui", "js/utils/date_utils", "js/models/uploads",
-    "js/views/uploads", "js/utils/change_on_enter", "js/views/metadata", "js/models/metadata", "jquery.timepicker", "date"],
+    "js/views/uploads", "js/utils/change_on_enter", "js/views/license", "js/models/license", "jquery.timepicker", "date"],
     function(ValidatingView, CodeMirror, _, $, ui, DateUtils, FileUploadModel,
-        FileUploadDialog, TriggerChangeEventOnEnter, MetadataView, MetadataModel) {
+        FileUploadDialog, TriggerChangeEventOnEnter, LicenseView, LicenseModel) {
 
 var DetailsView = ValidatingView.extend({
     // Model class is CMS.Models.Settings.CourseDetails
@@ -41,11 +41,8 @@ var DetailsView = ValidatingView.extend({
         this.listenTo(this.model, 'change', this.showNotificationBar);
         this.selectorToField = _.invert(this.fieldToSelectorMap);
         // handle license separately, to avoid reimplementing view logic
-        this.licenseModel = new MetadataModel({
-            value: this.model.get('license'),
-            explicitly_set: true
-        });
-        this.licenseView = new MetadataView.License({
+        this.licenseModel = new LicenseModel({"asString": this.model.get('license')});
+        this.licenseView = new LicenseView({
             model: this.licenseModel,
             el: this.$("#course-license-selector").get()
         });
@@ -333,7 +330,7 @@ var DetailsView = ValidatingView.extend({
 
     handleLicenseChange: function() {
         this.showNotificationBar()
-        this.model.set("license", this.licenseModel.getValue())
+        this.model.set("license", this.licenseModel.toString())
     }
 });
 

@@ -1,34 +1,29 @@
-<div class="wrapper-license-types">
-  <label class="label setting-label" for="list-license-types">
-    <%- model.display_name %>
-  </label>
-  <ul class="license-types" id="list-license-types">
-    <% var learn_more_tpl = gettext("{link_start}Learn more{link_end} about {license_name}"); %>
-    <% var link_start_tpl = '<a href="{url}" target="_blank">'; %>
-    <% _.each(licenseInfo, function(license, licenseType) { %>
-      <li data-license="<%- licenseType %>">
-        <button name="license-<%- licenseType %>" class="action license-button
-                <% if(parsed.type === licenseType) { print("is-selected"); } %>"
-              name="license-<%- licenseType %>"
-            <% if (license.tooltip) { %>data-tooltip="<%- license.tooltip %>"<% } %>>
-          <%- license.name %>
-        </button>
+<ul class="license-types" id="list-license-types">
+  <% var learn_more_tpl = gettext("{link_start}Learn more{link_end} about {license_name}"); %>
+  <% var link_start_tpl = '<a href="{url}" target="_blank">'; %>
+  <% _.each(licenseInfo, function(license, licenseType) { %>
+    <li data-license="<%- licenseType %>">
+      <button name="license-<%- licenseType %>" class="action license-button
+              <% if(model.type === licenseType) { print("is-selected"); } %>"
+            name="license-<%- licenseType %>"
+          <% if (license.tooltip) { %>data-tooltip="<%- license.tooltip %>"<% } %>>
+        <%- license.name %>
+      </button>
+      <p class="tip">
         <% if(license.url) { %>
-          <p class="tip">
-            <%= learn_more_tpl
-                    .replace("{link_start}", link_start_tpl.replace("{url}", license.url))
-                    .replace("{link_end}", "</a>")
-                    .replace("{license_name}", license.name) %>
-          </p>
+          <%= learn_more_tpl
+                  .replace("{link_start}", link_start_tpl.replace("{url}", license.url))
+                  .replace("{link_end}", "</a>")
+                  .replace("{license_name}", license.name) %>
         <% } else { %>
-          <p class="tip">&nbsp;</p>
+          &nbsp;
         <% } %>
-      </li>
-    <% }) %>
-  </ul>
-</div>
+      </p>
+    </li>
+  <% }) %>
+</ul>
 
-<% var license = licenseInfo[parsed.type]; %>
+<% var license = licenseInfo[model.type]; %>
 <% if(license && !_.isEmpty(license.options)) { %>
   <div class="wrapper-license-options">
     <label class="label setting-label">
@@ -42,9 +37,9 @@
       <% _.each(license.option_order, function(optionKey) { %>
         <% var optionInfo = license.options[optionKey]; %>
         <% if (optionInfo.type == "boolean") { %>
-          <% var optionSelected = parsed.options[optionKey]; %>
-          <% var optionDisabled = optionInfo.required ||
-              (optionInfo.conflictsWith && _.any(optionInfo.conflictsWith, function(key) {return parsed.options[key];}));
+          <% var optionSelected = model.options[optionKey]; %>
+          <% var optionDisabled = optionInfo.disabled ||
+              (optionInfo.conflictsWith && _.any(optionInfo.conflictsWith, function(key) {return model.options[key];}));
           %>
           <li data-option="<%- optionKey %>"
               class="action-item license-button
