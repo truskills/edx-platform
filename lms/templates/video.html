@@ -153,7 +153,7 @@
 % if cdn_eval:
 <script>
   function sendPerformanceBeacon(id, expgroup, value) {
-    var data = {event: "canplaythrough", id: id, expgroup: expgroup, value: value};
+    var data = {event: "canplaythrough", id: id, expgroup: expgroup, value: value, page: "html5vid"};
     $.ajax({method: "POST", url: "/performance", data: data});
   }
   var cdnStartTime, beaconSent = false;
