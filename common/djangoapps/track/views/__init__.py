@@ -82,6 +82,8 @@ def user_track(request):
     return HttpResponse('success')
 
 perflog = logging.getLogger("perflog")
+
+
 def performance_log(request):
     """
     Log when POST call to "performance" URL is made by a user.
@@ -108,6 +110,7 @@ def performance_log(request):
     perflog.info(json.dumps(event, cls=DateTimeJSONEncoder))
 
     return HttpResponse(status=204)
+
 
 def server_track(request, event_type, event, page=None):
     """
