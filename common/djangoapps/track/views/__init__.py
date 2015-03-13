@@ -1,7 +1,8 @@
 import datetime
+import logging
+import json
 
 import pytz
-import logging
 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
@@ -15,6 +16,7 @@ from track import tracker
 from track import contexts
 from track import shim
 from track.models import TrackingLog
+from track.utils import DateTimeJSONEncoder
 from eventtracking import tracker as eventtracker
 
 
@@ -96,6 +98,9 @@ def performance_log(request):
             "event": _get_request_value(request, 'event'),
             "agent": _get_request_header(request, 'HTTP_USER_AGENT'),
             "page": page,
+            "id": _get_request_value(request, 'id'),
+            "expgroup": _get_request_value(request, 'expgroup'),
+            "value": _get_request_value(request, 'value'),
             "time": datetime.datetime.utcnow(),
             "host": _get_request_header(request, 'SERVER_NAME'),
         }

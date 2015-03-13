@@ -2070,7 +2070,6 @@ SEARCH_ENGINE = None
 SEARCH_RESULT_PROCESSOR = "lms.lib.courseware_search.lms_result_processor.LmsSearchResultProcessor"
 
 ##### CDN EXPERIMENT/MONITORING FLAGS #####
-PERFORMANCE_GRAPHITE_URL = ''
 CDN_VIDEO_URLS = {}
 
 # The configuration for learner profiles
