@@ -1,5 +1,7 @@
-<%page args="license, size='88x31'"/>
+<%page args="license, button=False, button_size='88x31'"/>
 <%!
+from django.utils.translation import ugettext as _
+
 def parse_license(lic):
     """
     Returns a two-tuple: license type, and options.
@@ -22,7 +24,7 @@ def parse_license(lic):
 %>
 <% license_type, license_options = parse_license(license) %>
 % if license_type == "all-rights-reserved":
-    © All Rights Reserved
+    © <span class="license-text">${_("All Rights Reserved")}</span>
 % elif license_type == "creative-commons":
     <%
     possible = ["by", "nc", "nd", "sa"]
@@ -34,9 +36,18 @@ def parse_license(lic):
         version = license_options.get("ver", "1.0")
     %>
     <a rel="license" href="//creativecommons.org/licenses/${'-'.join(enabled)}/${version}/">
-    <img src="https://licensebuttons.net/l/${'-'.join(enabled)}/${version}/${size}.png"
-         alt="${license}"
-         />
+    % if button:
+        <img src="https://licensebuttons.net/l/${'-'.join(enabled)}/${version}/${button_size}.png"
+             alt="${license}"
+             />
+        </a>
+    % else:
+        <i class="icon-cc"></i>
+        % for option in enabled:
+            <i class="icon-cc-${option}"></i>
+        % endfor
+        <span class="license-text">${_("Some Rights Reserved")}</span>
+    % endif
     </a>
 % else:
     ${license}

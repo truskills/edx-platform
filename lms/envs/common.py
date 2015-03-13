@@ -1204,7 +1204,9 @@ PIPELINE_CSS = {
     'style-app': {
         'source_filenames': [
             'sass/application.css',
-            'sass/ie.css'
+            'css/edx-cc.css',
+            'sass/ie.css',
+            'css/edx-cc-ie7.css',
         ],
         'output_filename': 'css/lms-style-app.css',
     },
