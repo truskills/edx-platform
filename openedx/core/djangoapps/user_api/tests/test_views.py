@@ -1306,7 +1306,7 @@ class RegistrationViewTest(ApiTestCase):
         sent_email = mail.outbox[0]
         self.assertEqual(sent_email.to, [self.EMAIL])
         self.assertEqual(sent_email.subject, "Activate Your edX Account")
-        self.assertIn("activate your account", sent_email.body)
+        self.assertIn("activating your edX account", sent_email.body)
 
     @ddt.data(
         {"email": ""},
