@@ -17,7 +17,7 @@ This page contains docstrings and example responses for:
 Get Course Updates
 *******************
 
-.. autoclass:: course_info.views.CourseUpdatesList
+.. .. autoclass:: course_info.views.CourseUpdatesList
 
 **Use Case**
 
@@ -71,7 +71,7 @@ A array of course updates. Each course update contains:
 Get Course Handouts
 *******************
 
-.. autoclass:: course_info.views.CourseHandoutsList
+.. .. autoclass:: course_info.views.CourseHandoutsList
 
 **Use Case**
 
@@ -107,8 +107,8 @@ Get the HTML for course handouts.
 Get the Course About Page
 **************************
 
-.. autoclass:: course_info.views.CourseAboutDetail
-..    :members:
+.. .. autoclass:: course_info.views.CourseAboutDetail
+
 
 **Use Case**
 

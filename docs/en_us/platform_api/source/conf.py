@@ -93,8 +93,59 @@ MOCK_MODULES = [
     'xblock.exceptions',
     'xmodule.seq_module',
     'xmodule.vertical_module',
-    'xmodule.x_module'
-    
+    'xmodule.x_module',
+    'nltk',
+    'ratelimitbackend',
+    'ratelimitbackend.exceptions',
+    'social',
+    'social.apps',
+    'social.apps.django_app',
+    'social.backends',
+    'mako',
+    'exceptions',
+    'mako.exceptions',
+    'boto',
+    'exception',
+    'boto.exception',
+    'PIL',
+    'reportlab',
+    'lib',
+    'reportlab.lib',
+    'pdfgen',
+    'canvas',
+    'pdfgen',
+    'pdfgen.canvas',
+    'reportlab.pdfgen',
+    'reportlab.pdfgen.canvas',
+    'reportlab.lib.pagesizes',
+    'reportlab.lib.units', 
+    'reportlab.lib.styles',
+    'reportlab.platypus',
+    'reportlab.platypus.tables',
+    'boto',
+    's3',
+    'connection',
+    'boto.s3',
+    'boto.s3.connection',
+    'boto.s3.key',
+    'Crypto',
+    'Crypto.Cipher',
+    'Crypto.PublicKey',
+    'openid',
+    'store',
+    'interface',
+    'openid.store',
+    'store.interface',
+    'openid.store.interface',
+    'external_auth.views',
+    'html_to_text',
+    'mail_utils',
+    'ratelimitbackend.backends',
+    'social.apps.django_app.default',
+    'social.exceptions',
+    'social.pipeline',
+    'xmodule.error_module',
+    'accounts.api'
 ]
 
 for mod_name in MOCK_MODULES:
@@ -134,6 +185,8 @@ sys.path.append(root / "lms/djangoapps/mobile_api")
 sys.path.append(root / "lms/djangoapps/mobile_api/course_info")
 sys.path.append(root / "lms/djangoapps/mobile_api/users")
 sys.path.append(root / "lms/djangoapps/mobile_api/video_outlines")
+sys.path.append(root / "openedx/core/djangoapps/user_api")
+sys.path.append(root / "openedx/core/djangoapps/user_api/accounts")
 
 sys.path.insert(
     0,

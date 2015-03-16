@@ -15,7 +15,7 @@ This page contains docstrings and example responses for:
 Get the Video List
 *******************
 
-.. autoclass:: video_outlines.views.VideoSummaryList
+.. .. autoclass:: video_outlines.views.VideoSummaryList
 
 
 **Example response**
@@ -71,7 +71,7 @@ Get the Video List
 Get a Video Transcript
 ***********************
 
-.. autoclass:: video_outlines.views.VideoTranscripts
+.. .. autoclass:: video_outlines.views.VideoTranscripts
     
 **Response Values**
 

@@ -12,3 +12,4 @@ edX Platform APIs
     authentication
     mobile/index
     enrollment/index
+    user/index
