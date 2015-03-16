@@ -6,29 +6,22 @@ from uuid import uuid4
 from ddt import ddt, data
 from django.core.urlresolvers import reverse
 from django.test.utils import override_settings
-import httpretty
-from httpretty.core import HTTPrettyRequestEmpty
-import jwt
-from requests import Timeout
 from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase
 from xmodule.modulestore.tests.factories import CourseFactory
 
 from commerce.constants import OrderStatus, Messages
+from commerce.exceptions import TimeoutError, ApiError
+from commerce.tests import EcommerceApiTestMixin
 from course_modes.models import CourseMode
 from enrollment.api import add_enrollment
 from student.models import CourseEnrollment
 from student.tests.factories import UserFactory, CourseModeFactory
 
 
-ECOMMERCE_API_URL = 'http://example.com/api'
-ECOMMERCE_API_SIGNING_KEY = 'edx'
-ORDER_NUMBER = "100004"
-ECOMMERCE_API_SUCCESSFUL_BODY = json.dumps({'status': OrderStatus.COMPLETE, 'number': ORDER_NUMBER})
-
-
 @ddt
-@override_settings(ECOMMERCE_API_URL=ECOMMERCE_API_URL, ECOMMERCE_API_SIGNING_KEY=ECOMMERCE_API_SIGNING_KEY)
-class OrdersViewTests(ModuleStoreTestCase):
+@override_settings(ECOMMERCE_API_URL=EcommerceApiTestMixin.ECOMMERCE_API_URL,
+                   ECOMMERCE_API_SIGNING_KEY=EcommerceApiTestMixin.ECOMMERCE_API_SIGNING_KEY)
+class OrdersViewTests(EcommerceApiTestMixin, ModuleStoreTestCase):
     """
     Tests for the commerce orders view.
     """
@@ -48,18 +41,6 @@ class OrdersViewTests(ModuleStoreTestCase):
         """
         course_id = unicode(course_id or self.course.id)
         return self.client.post(self.url, {'course_id': course_id})
-
-    def _mock_ecommerce_api(self, status=200, body=None):
-        """
-        Mock calls to the E-Commerce API.
-
-        The calling test should be decorated with @httpretty.activate.
-        """
-        self.assertTrue(httpretty.is_enabled(), 'Test is missing @httpretty.activate decorator.')
-
-        url = ECOMMERCE_API_URL + '/orders/'
-        body = body or ECOMMERCE_API_SUCCESSFUL_BODY
-        httpretty.register_uri(httpretty.POST, url, status=status, body=body)
 
     def assertResponseMessage(self, response, expected_msg):
         """ Asserts the detail field in the response's JSON body equals the expected message. """
@@ -81,7 +62,7 @@ class OrdersViewTests(ModuleStoreTestCase):
 
         # TODO Verify this is the best method to create CourseMode objects.
         # TODO Find/create constants for the modes.
-        for mode in ['honor', 'verified', 'audit']:
+        for mode in [CourseMode.HONOR, CourseMode.VERIFIED, CourseMode.AUDIT]:
             CourseModeFactory.create(
                 course_id=self.course.id,
                 mode_slug=mode,
@@ -118,45 +99,27 @@ class OrdersViewTests(ModuleStoreTestCase):
         self.assertEqual(406, self.client.post(self.url, {}).status_code)
         self.assertEqual(406, self.client.post(self.url, {'not_course_id': ''}).status_code)
 
-    @httpretty.activate
-    @data(400, 401, 405, 406, 429, 500, 503)
-    def test_ecommerce_api_bad_status(self, status):
-        """
-        If the E-Commerce API returns an HTTP status not equal to 200, the view should log an error and return
-        an HTTP 503 status.
-        """
-        self._mock_ecommerce_api(status=status, body=json.dumps({'user_message': 'FAIL!'}))
-        response = self._post_to_view()
-        self.assertValidEcommerceApiErrorResponse(response)
-        self.assertFalse(CourseEnrollment.is_enrolled(self.user, self.course.id))
-
-    @httpretty.activate
     def test_ecommerce_api_timeout(self):
         """
         If the call to the E-Commerce API times out, the view should log an error and return an HTTP 503 status.
         """
-        # Verify that the view responds appropriately if calls to the E-Commerce API timeout.
-        def request_callback(_request, _uri, _headers):
-            """ Simulates API timeout """
-            raise Timeout
+        with self.mock_create_order(side_effect=TimeoutError):
+            response = self._post_to_view()
 
-        self._mock_ecommerce_api(body=request_callback)
-        response = self._post_to_view()
         self.assertValidEcommerceApiErrorResponse(response)
         self.assertFalse(CourseEnrollment.is_enrolled(self.user, self.course.id))
 
-    @httpretty.activate
-    def test_ecommerce_api_bad_data(self):
+    def test_ecommerce_api_error(self):
         """
-        If the E-Commerce API returns data that is not JSON, the view should return an HTTP 503 status.
+        If the E-Commerce API raises an error, the view should return an HTTP 503 status.
         """
-        self._mock_ecommerce_api(body='TOTALLY NOT JSON!')
-        response = self._post_to_view()
+        with self.mock_create_order(side_effect=ApiError):
+            response = self._post_to_view()
+
         self.assertValidEcommerceApiErrorResponse(response)
         self.assertFalse(CourseEnrollment.is_enrolled(self.user, self.course.id))
 
     @data(True, False)
-    @httpretty.activate
     def test_course_with_honor_seat_sku(self, user_is_active):
         """
         If the course has a SKU, the view should get authorization from the E-Commerce API before enrolling
@@ -167,43 +130,31 @@ class OrdersViewTests(ModuleStoreTestCase):
         self.user.is_active = user_is_active
         self.user.save()  # pylint: disable=no-member
 
-        def request_callback(_method, _uri, headers):
+        def mocked_method(_user, _sku):
             """ Mock the E-Commerce API's call to the enrollment API. """
             add_enrollment(self.user.username, unicode(self.course.id), 'honor')
-            return 200, headers, ECOMMERCE_API_SUCCESSFUL_BODY
+            return self.ORDER_NUMBER, OrderStatus.COMPLETE, self.ECOMMERCE_API_SUCCESSFUL_BODY
 
-        self._mock_ecommerce_api(body=request_callback)
-        response = self._post_to_view()
+        with self.mock_create_order(side_effect=mocked_method):
+            response = self._post_to_view()
 
         # Validate the response content
-        msg = Messages.ORDER_COMPLETED.format(order_number=ORDER_NUMBER)
+        msg = Messages.ORDER_COMPLETED.format(order_number=self.ORDER_NUMBER)
         self.assertResponseMessage(response, msg)
-
         self.assertTrue(CourseEnrollment.is_enrolled(self.user, self.course.id))
 
-        # Verify the correct information was passed to the E-Commerce API
-        request = httpretty.last_request()
-        sku = CourseMode.objects.filter(course_id=self.course.id, mode_slug='honor', sku__isnull=False)[0].sku
-        self.assertEqual(request.body, '{{"sku": "{}"}}'.format(sku))
-        self.assertEqual(request.headers['Content-Type'], 'application/json')
-
-        # Verify the JWT is correct
-        expected_jwt = jwt.encode({'username': self.user.username, 'email': self.user.email},
-                                  ECOMMERCE_API_SIGNING_KEY)
-        self.assertEqual(request.headers['Authorization'], 'JWT {}'.format(expected_jwt))
-
-    @httpretty.activate
     def test_order_not_complete(self):
-        self._mock_ecommerce_api(body=json.dumps({'status': OrderStatus.OPEN, 'number': ORDER_NUMBER}))
-        response = self._post_to_view()
+        with self.mock_create_order(return_value=(self.ORDER_NUMBER,
+                                                  OrderStatus.OPEN,
+                                                  self.ECOMMERCE_API_SUCCESSFUL_BODY)):
+            response = self._post_to_view()
         self.assertEqual(response.status_code, 202)
-        msg = Messages.ORDER_INCOMPLETE_ENROLLED.format(order_number=ORDER_NUMBER)
+        msg = Messages.ORDER_INCOMPLETE_ENROLLED.format(order_number=self.ORDER_NUMBER)
         self.assertResponseMessage(response, msg)
 
         # TODO Eventually we should NOT be enrolling users directly from this view.
         self.assertTrue(CourseEnrollment.is_enrolled(self.user, self.course.id))
 
-    @httpretty.activate
     def test_course_without_sku(self):
         """
         If the course does NOT have a SKU, the user should be enrolled in the course (under the honor mode) and
@@ -215,8 +166,8 @@ class OrdersViewTests(ModuleStoreTestCase):
             course_mode.save()
 
         # Place an order
-        self._mock_ecommerce_api()
-        response = self._post_to_view()
+        with self.mock_create_order() as api_mock:
+            response = self._post_to_view()
 
         # Validate the response content
         self.assertEqual(response.status_code, 200)
@@ -226,22 +177,52 @@ class OrdersViewTests(ModuleStoreTestCase):
 
         # The user should be enrolled, and no calls made to the E-Commerce API
         self.assertTrue(CourseEnrollment.is_enrolled(self.user, self.course.id))
-        self.assertIsInstance(httpretty.last_request(), HTTPrettyRequestEmpty)
+        self.assertFalse(api_mock.called)
 
-    @httpretty.activate
     @override_settings(ECOMMERCE_API_URL=None, ECOMMERCE_API_SIGNING_KEY=None)
-    def test_no_settings(self):
+    def test_ecommerce_service_not_configured(self):
         """
-        If no settings exist to define the E-Commerce API URL or signing key, the view should enroll the user.
+        If the E-Commerce Service is not configured, the view should enroll the user.
         """
-        response = self._post_to_view()
+        with self.mock_create_order() as api_mock:
+            response = self._post_to_view()
 
         # Validate the response
-        self._mock_ecommerce_api()
         self.assertEqual(response.status_code, 200)
         msg = Messages.NO_ECOM_API.format(username=self.user.username, course_id=self.course.id)
         self.assertResponseMessage(response, msg)
 
         # Ensure that the user is not enrolled and that no calls were made to the E-Commerce API
         self.assertTrue(CourseEnrollment.is_enrolled(self.user, self.course.id))
-        self.assertIsInstance(httpretty.last_request(), HTTPrettyRequestEmpty)
+        self.assertFalse(api_mock.called)
+
+    def assertProfessionalModeBypassed(self):
+        """ Verifies that the view returns HTTP 406 when a course with no honor mode is encountered. """
+
+        CourseMode.objects.filter(course_id=self.course.id).delete()
+        mode = CourseMode.NO_ID_PROFESSIONAL_MODE
+        CourseModeFactory.create(course_id=self.course.id, mode_slug=mode, mode_display_name=mode,
+                                 sku=uuid4().hex.decode('ascii'))
+
+        with self.mock_create_order() as api_mock:
+            response = self._post_to_view()
+
+        # The view should return an error status code
+        self.assertEqual(response.status_code, 406)
+        msg = Messages.NO_HONOR_MODE.format(course_id=self.course.id)
+        self.assertResponseMessage(response, msg)
+
+        # No calls should be made to the E-Commerce API.
+        self.assertFalse(api_mock.called)
+
+    def test_course_with_professional_mode_only(self):
+        """ Verifies that the view behaves appropriately when the course only has a professional mode. """
+        self.assertProfessionalModeBypassed()
+
+    @override_settings(ECOMMERCE_API_URL=None, ECOMMERCE_API_SIGNING_KEY=None)
+    def test_professional_mode_only_and_ecommerce_service_not_configured(self):
+        """
+        Verifies that the view behaves appropriately when the course only has a professional mode and
+        the E-Commerce Service is not configured.
+        """
+        self.assertProfessionalModeBypassed()
