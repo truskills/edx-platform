@@ -210,10 +210,14 @@ ul.license-types {
   }
 }
 .wrapper-license-options {
+  margin-bottom: 10px;
+
   .tip {
     @extend %t-copy-sub2;
   }
-  ul.license-options {
+  #list-license-options {
+    padding-bottom: 10px;
+
     li {
       line-height: 1.5;
       border-bottom: 1px solid #EEE;

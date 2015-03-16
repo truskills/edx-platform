@@ -44,7 +44,8 @@ var DetailsView = ValidatingView.extend({
         this.licenseModel = new LicenseModel({"asString": this.model.get('license')});
         this.licenseView = new LicenseView({
             model: this.licenseModel,
-            el: this.$("#course-license-selector").get()
+            el: this.$("#course-license-selector").get(),
+            showPreview: true
         });
         this.listenTo(this.licenseModel, 'change', this.handleLicenseChange);
     },

@@ -58,6 +58,7 @@ define(["js/views/baseview", "underscore"], function(BaseView, _) {
 
       initialize: function(options) {
           this.licenseInfo = options.licenseInfo || defaultLicenseInfo;
+          this.showPreview = !!options.showPreview; // coerce to boolean
           this.template = this.loadTemplate("license-selector");
 
           // Rerender when the model changes
@@ -85,6 +86,7 @@ define(["js/views/baseview", "underscore"], function(BaseView, _) {
           this.$el.html(this.template({
               model: this.model.attributes,
               licenseInfo: this.licenseInfo,
+              showPreview: this.showPreview,
           }));
           return this;
       },
