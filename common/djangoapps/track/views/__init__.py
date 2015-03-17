@@ -1,6 +1,5 @@
 import datetime
 import json
-import logging
 
 import pytz
 
@@ -16,7 +15,6 @@ from track import tracker
 from track import contexts
 from track import shim
 from track.models import TrackingLog
-from track.utils import DateTimeJSONEncoder
 from eventtracking import tracker as eventtracker
 
 
@@ -80,36 +78,6 @@ def user_track(request):
     log_event(event)
 
     return HttpResponse('success')
-
-perflog = logging.getLogger("perflog")
-
-
-def performance_log(request):
-    """
-    Log when POST call to "performance" URL is made by a user.
-    Request should provide "event" and "page" arguments.
-    """
-    page = _get_request_value(request, 'page')
-
-    with eventtracker.get_tracker().context('edx.course.browser', contexts.course_context_from_url(page)):
-        event = {
-            "ip": _get_request_header(request, 'REMOTE_ADDR'),
-            "referer": _get_request_header(request, 'HTTP_REFERER'),
-            "accept_language": _get_request_header(request, 'HTTP_ACCEPT_LANGUAGE'),
-            "event_source": "browser",
-            "event": _get_request_value(request, 'event'),
-            "agent": _get_request_header(request, 'HTTP_USER_AGENT'),
-            "page": page,
-            "id": _get_request_value(request, 'id'),
-            "expgroup": _get_request_value(request, 'expgroup'),
-            "value": _get_request_value(request, 'value'),
-            "time": datetime.datetime.utcnow(),
-            "host": _get_request_header(request, 'SERVER_NAME'),
-        }
-
-    perflog.info(json.dumps(event, cls=DateTimeJSONEncoder))
-
-    return HttpResponse(status=204)
 
 
 def server_track(request, event_type, event, page=None):
