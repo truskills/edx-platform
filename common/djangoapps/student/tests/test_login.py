@@ -3,28 +3,26 @@ Tests for student activation and login
 '''
 import json
 import unittest
-
 from django.test import TestCase
 from django.test.client import Client
 from django.conf import settings
 from django.core.cache import cache
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.http import HttpResponseBadRequest, HttpResponse
-from external_auth.models import ExternalAuthMap
 import httpretty
 from mock import patch
 from social.apps.django_app.default.models import UserSocialAuth
+from xmodule.modulestore.tests.factories import CourseFactory
+from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase
 
-from util.test_third_party_auth_util import (
+from external_auth.models import ExternalAuthMap
+from third_party_auth.tests.utils import (
     ThirdPartyOAuthTestMixin,
     ThirdPartyOAuthTestMixinFacebook,
     ThirdPartyOAuthTestMixinGoogle
 )
 from student.tests.factories import UserFactory, RegistrationFactory, UserProfileFactory
 from student.views import login_oauth_token
-
-from xmodule.modulestore.tests.factories import CourseFactory
-from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase
 
 
 class LoginTest(TestCase):

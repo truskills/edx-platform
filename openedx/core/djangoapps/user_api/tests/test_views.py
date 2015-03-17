@@ -5,7 +5,6 @@ import base64
 import json
 import re
 import httpretty
-
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.core import mail
@@ -13,28 +12,27 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from django.test.testcases import restore_transaction_methods, disable_transaction_methods
 from django.test.utils import override_settings
-from unittest import skipUnless
+from unittest import skipUnless, SkipTest
 import ddt
 from pytz import UTC
 import mock
 from xmodule.modulestore.tests.factories import CourseFactory
 from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase
+from opaque_keys.edx.locations import SlashSeparatedCourseKey
 
 from social.apps.django_app.default.models import UserSocialAuth
-from student.tests.factories import UserFactory
-from unittest import SkipTest
 from django_comment_common import models
-from opaque_keys.edx.locations import SlashSeparatedCourseKey
 from third_party_auth.tests.testutil import simulate_running_pipeline
-from util.test_third_party_auth_util import (
+from third_party_auth.tests.utils import (
     ThirdPartyOAuthTestMixin, ThirdPartyOAuthTestMixinFacebook, ThirdPartyOAuthTestMixinGoogle
 )
-
+from student.tests.factories import UserFactory
 from ..accounts.api import get_account_settings
 from ..api import account as account_api, profile as profile_api
 from ..models import UserOrgTag
 from ..tests.factories import UserPreferenceFactory
 from ..tests.test_constants import SORTED_COUNTRIES
+
 
 TEST_API_KEY = "test_api_key"
 USER_LIST_URI = "/user_api/v1/users/"

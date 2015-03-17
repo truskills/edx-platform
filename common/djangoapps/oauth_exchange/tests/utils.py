@@ -3,7 +3,8 @@ Test utilities for OAuth access token exchange
 """
 import provider.constants
 from social.apps.django_app.default.models import UserSocialAuth
-from util.test_third_party_auth_util import ThirdPartyOAuthTestMixin
+
+from third_party_auth.tests.utils import ThirdPartyOAuthTestMixin
 
 
 class AccessTokenExchangeTestMixin(ThirdPartyOAuthTestMixin):
