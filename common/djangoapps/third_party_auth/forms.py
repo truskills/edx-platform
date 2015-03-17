@@ -2,20 +2,19 @@
 Forms to support third-party access token
 """
 from __future__ import absolute_import
-from requests import HTTPError
 
+from requests import HTTPError
 from django.contrib.auth.models import User
 from django.forms import CharField
-from oauth2_provider.constants import SCOPE_NAMES
 
+from oauth2_provider.constants import SCOPE_NAMES
 from provider import constants
 from provider.forms import OAuthForm, OAuthValidationError
 from provider.oauth2.forms import ScopeChoiceField, ScopeMixin
 from provider.oauth2.models import Client
-
 from social.backends import oauth as social_oauth
 
-from .pipeline import AUTH_ENTRY_KEY
+from third_party_auth.pipeline import AUTH_ENTRY_KEY
 
 
 class ThirdPartyAccessTokenForm(ScopeMixin, OAuthForm):
@@ -24,6 +23,7 @@ class ThirdPartyAccessTokenForm(ScopeMixin, OAuthForm):
 
     Subclasses must define THIRD_PARTY_AUTH_ENTRY_TYPE.
     """
+
     access_token = CharField(required=False)
     scope = ScopeChoiceField(choices=SCOPE_NAMES, required=False)
     client_id = CharField(required=False)
@@ -31,6 +31,13 @@ class ThirdPartyAccessTokenForm(ScopeMixin, OAuthForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super(ThirdPartyAccessTokenForm, self).__init__(*args, **kwargs)
+
+    def get_auth_entry_value(self):
+        """
+        Returns the third party auth entry type to store in the pipeline's AUTH_ENTRY_KEY.
+        To be overridden by concrete subclasses.
+        """
+        raise NotImplementedError
 
     def _require_oauth_field(self, field_name):
         """
@@ -74,7 +81,7 @@ class ThirdPartyAccessTokenForm(ScopeMixin, OAuthForm):
                 }
             )
 
-        self.request.session[AUTH_ENTRY_KEY] = self.THIRD_PARTY_AUTH_ENTRY_TYPE  # pylint: disable=no-member
+        self.request.session[AUTH_ENTRY_KEY] = self.get_auth_entry_value()
 
         client_id = self.cleaned_data["client_id"]
         try:

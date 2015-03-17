@@ -9,4 +9,5 @@ class ThirdPartyAccountCreationForm(ThirdPartyAccessTokenForm):
     A form for account creation with a third party access token.
     It is currently only used for validation, not rendering.
     """
-    THIRD_PARTY_AUTH_ENTRY_TYPE = pipeline.AUTH_ENTRY_REGISTER_API
+    def get_auth_entry_value(self):
+        return pipeline.AUTH_ENTRY_REGISTER_API

@@ -7,4 +7,5 @@ from third_party_auth.forms import ThirdPartyAccessTokenForm
 
 class AccessTokenExchangeForm(ThirdPartyAccessTokenForm):
     """Form for access token exchange endpoint"""
-    THIRD_PARTY_AUTH_ENTRY_TYPE = pipeline.AUTH_ENTRY_LOGIN_API
+    def get_auth_entry_value(self):
+        return pipeline.AUTH_ENTRY_LOGIN_API
