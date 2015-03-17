@@ -4,12 +4,14 @@ import datetime
 import base64
 import json
 import re
+import httpretty
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.core import mail
 from django.contrib.auth.models import User
 from django.test import TestCase
+from django.test.testcases import restore_transaction_methods, disable_transaction_methods
 from django.test.utils import override_settings
 from unittest import skipUnless
 import ddt
@@ -18,18 +20,21 @@ import mock
 from xmodule.modulestore.tests.factories import CourseFactory
 from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase
 
+from social.apps.django_app.default.models import UserSocialAuth
 from student.tests.factories import UserFactory
 from unittest import SkipTest
 from django_comment_common import models
 from opaque_keys.edx.locations import SlashSeparatedCourseKey
 from third_party_auth.tests.testutil import simulate_running_pipeline
+from util.test_third_party_auth_util import (
+    ThirdPartyOAuthTestMixin, ThirdPartyOAuthTestMixinFacebook, ThirdPartyOAuthTestMixinGoogle
+)
 
 from ..accounts.api import get_account_settings
 from ..api import account as account_api, profile as profile_api
 from ..models import UserOrgTag
 from ..tests.factories import UserPreferenceFactory
 from ..tests.test_constants import SORTED_COUNTRIES
-
 
 TEST_API_KEY = "test_api_key"
 USER_LIST_URI = "/user_api/v1/users/"
@@ -1516,6 +1521,124 @@ class RegistrationViewTest(ApiTestCase):
         # Verify that the form description matches what we'd expect
         form_desc = json.loads(response.content)
         self.assertIn(expected_field, form_desc["fields"])
+
+
+@httpretty.activate
+@ddt.ddt
+class ThirdPartyRegistrationTestMixin(ThirdPartyOAuthTestMixin):
+    """
+    Tests for the User API registration endpoint with 3rd party authentication.
+    """
+    def setUp(self):
+        super(ThirdPartyRegistrationTestMixin, self).setUp(create_user=False)
+        self.url = reverse('user_api_registration')
+
+    def data(self, user=None):
+        """Returns the request data for the endpoint."""
+        return {
+            "provider": self.BACKEND,
+            "access_token": self.access_token,
+            "client_id": self.client_id,
+            "honor_code": "true",
+            "country": "US",
+            "username": user.username if user else "test_username",
+            "name": user.first_name if user else "test name",
+            "email": user.email if user else "test@test.com",
+        }
+
+    def _assert_oauth_error(self, response, status_code, error):
+        """Assert that the given response was an error with the given status_code and error code"""
+        self.assertEqual(response.status_code, status_code)
+        self.assertEqual(json.loads(response.content)['error'], error)
+        self.assertNotIn("partial_pipeline", self.client.session)
+
+    def _assert_existing_user_error(self, response):
+        """Assert that the given response was an error with the given status_code and error code"""
+        self.assertEqual(response.status_code, 409)
+        errors = json.loads(response.content)
+        for conflict_attribute in ["username", "email"]:
+            self.assertIn(conflict_attribute, errors)
+            self.assertIn("belongs to an existing account", errors[conflict_attribute][0]["user_message"])
+        self.assertNotIn("partial_pipeline", self.client.session)
+
+    def _verify_user_existence(self, user_exists, social_link_exists, user_is_active=None, username=None):
+        """Verifies whether the user object exists."""
+        users = User.objects.filter(username=(username if username else "test_username"))
+        self.assertEquals(len(users), 1 if user_exists else 0)
+        if user_exists:
+            self.assertEquals(users[0].is_active, user_is_active)
+        if social_link_exists:
+            social_users = UserSocialAuth.objects.filter(user=users[0], provider=self.BACKEND)
+            self.assertEquals(len(social_users), 1)
+
+    def test_success(self):
+        self._verify_user_existence(user_exists=False, social_link_exists=False)
+
+        self._setup_provider_response(success=True)
+        response = self.client.post(self.url, self.data())
+        self.assertEqual(response.status_code, 200)
+
+        self._verify_user_existence(user_exists=True, social_link_exists=True, user_is_active=False)
+
+    def test_user_conflict(self):
+        self._setup_provider_response(success=True)
+        user = UserFactory()
+        UserSocialAuth.objects.create(user=user, provider=self.BACKEND, uid=self.social_uid)
+        response = self.client.post(self.url, self.data(user))
+        self._assert_existing_user_error(response)
+        self._verify_user_existence(
+            user_exists=True, social_link_exists=True, user_is_active=True, username=user.username
+        )
+
+    def test_unlinked_active_user(self):
+        user = UserFactory()
+        response = self.client.post(self.url, self.data(user))
+        self._assert_existing_user_error(response)
+        self._verify_user_existence(
+            user_exists=True, social_link_exists=False, user_is_active=True, username=user.username
+        )
+
+    def test_unlinked_inactive_user(self):
+        user = UserFactory(is_active=False)
+        response = self.client.post(self.url, self.data(user))
+        self._assert_existing_user_error(response)
+        self._verify_user_existence(
+            user_exists=True, social_link_exists=False, user_is_active=False, username=user.username
+        )
+
+    def test_invalid_token(self):
+        self._setup_provider_response(success=False)
+
+        # temporarily enable transactions in test code to verify the transaction gets aborted.
+        restore_transaction_methods()
+        response = self.client.post(self.url, self.data())
+        disable_transaction_methods()
+
+        self._assert_oauth_error(response, 400, "invalid_grant")
+        self._verify_user_existence(user_exists=False, social_link_exists=False)
+
+    @ddt.data("access_token", "client_id")
+    def test_missing_auth_field(self, field_name):
+        data = self.data()
+        data.pop(field_name)
+
+        # temporarily enable transactions in test code to verify the transaction gets aborted.
+        restore_transaction_methods()
+        response = self.client.post(self.url, data)
+        disable_transaction_methods()
+
+        self._assert_oauth_error(response, 400, "invalid_request")
+        self._verify_user_existence(user_exists=False, social_link_exists=False)
+
+
+@skipUnless(settings.FEATURES.get("ENABLE_THIRD_PARTY_AUTH"), "third party auth not enabled")
+class TestFacebookRegistrationView(ThirdPartyRegistrationTestMixin, ThirdPartyOAuthTestMixinFacebook, ApiTestCase):
+    pass
+
+
+@skipUnless(settings.FEATURES.get("ENABLE_THIRD_PARTY_AUTH"), "third party auth not enabled")
+class TestGoogleRegistrationView(ThirdPartyRegistrationTestMixin, ThirdPartyOAuthTestMixinGoogle, ApiTestCase):
+    pass
 
 
 @ddt.ddt

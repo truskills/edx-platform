@@ -3,6 +3,7 @@ import copy
 from openedx.core.lib.api.permissions import ApiKeyHeaderPermission
 from opaque_keys import InvalidKeyError
 import third_party_auth
+from provider.forms import OAuthValidationError
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -283,6 +284,10 @@ class RegistrationView(APIView):
 
         try:
             create_account_with_params(request, data)
+
+        except OAuthValidationError as oauth_error:
+            return JsonResponse(oauth_error.message, status=400)
+
         except ValidationError as err:
             # Should only get non-field errors from this function
             assert NON_FIELD_ERRORS not in err.message_dict
@@ -705,7 +710,9 @@ class RegistrationView(APIView):
         if third_party_auth.is_enabled():
             running_pipeline = third_party_auth.pipeline.get(request)
             if running_pipeline:
-                current_provider = third_party_auth.provider.Registry.get_by_backend_name(running_pipeline.get('backend'))
+                current_provider = third_party_auth.provider.Registry.get_by_backend_name(
+                    running_pipeline.get('backend')
+                )
 
                 # Override username / email / full name
                 field_overrides = current_provider.get_register_form_data(

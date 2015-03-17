@@ -165,7 +165,7 @@ class PipelineEnrollmentTest(UrlResetMixin, ModuleStoreTestCase):
             details=None,
             response=None,
             uid=None,
-            is_register=True,
+            auth_entry=pipeline.AUTH_ENTRY_REGISTER,
             backend=backend
         )
         self.assertIsNotNone(response)
