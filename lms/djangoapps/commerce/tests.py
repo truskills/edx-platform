@@ -272,3 +272,15 @@ class OrdersViewTests(EnrollmentEventTestMixin, ModuleStoreTestCase):
             course_mode.save()
 
         self._test_course_without_sku()
+
+    def test_existing_enrollment(self):
+        """ The view should respond with HTTP 200 if the user is already enrolled in the course. """
+
+        # Enroll user in the course
+        CourseEnrollment.enroll(self.user, self.course.id)
+        self.assertTrue(CourseEnrollment.is_enrolled(self.user, self.course.id))
+
+        response = self._post_to_view()
+        self.assertEqual(response.status_code, 409)
+        msg = Messages.ENROLLMENT_EXISTS.format(username=self.user.username, course_id=self.course.id)
+        self.assertResponseMessage(response, msg)

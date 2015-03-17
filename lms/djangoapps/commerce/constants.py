@@ -19,3 +19,4 @@ class Messages(object):
     NO_SKU_ENROLLED = u'The {enrollment_mode} mode for {course_id} does not have a SKU. Enrolling {username} directly.'
     ORDER_COMPLETED = u'Order {order_number} was completed.'
     ORDER_INCOMPLETE_ENROLLED = u'Order {order_number} was created, but is not yet complete. User was enrolled.'
+    ENROLLMENT_EXISTS = u'User {username} is already enrolled in {course_id}.'
