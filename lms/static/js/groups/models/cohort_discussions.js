@@ -5,7 +5,7 @@ var edx = edx || {};
 
     edx.groups = edx.groups || {};
 
-    edx.groups.DiscussionTopicsModel = Backbone.Model.extend({
+    edx.groups.DiscussionTopicsSettingsModel = Backbone.Model.extend({
         defaults: {
             course_wide_discussions: {},
             inline_discussions: {}

@@ -460,6 +460,11 @@ class CohortManagementSection(PageObject):
         """
         Shows the discussion topics.
         """
+        EmptyPromise(
+            lambda: self.q(css=self._bounded_selector('.toggle-cohort-management-discussions')).results != 0,
+            "Waiting for discussion section to show"
+        ).fulfill()
+
         # If the discussion topic section has not yet been toggled on, click on the toggle link.
         self.q(css=self._bounded_selector(".toggle-cohort-management-discussions")).click()
 
@@ -486,6 +491,18 @@ class CohortManagementSection(PageObject):
         Selects the always_cohort_inline_discussions radio button.
         """
         self.q(css=self._bounded_selector(".check-all-inline-discussions")).first.click()
+
+    def always_inline_discussion_selected(self):
+        """
+        Returns the checked always_cohort_inline_discussions radio button.
+        """
+        return self.q(css=self._bounded_selector(".check-all-inline-discussions:checked"))
+
+    def cohort_some_inline_discussion_selected(self):
+        """
+        Returns the checked some_cohort_inline_discussions radio button.
+        """
+        return self.q(css=self._bounded_selector(".check-cohort-inline-discussions:checked"))
 
     def select_cohort_some_inline_discussion(self):
         """

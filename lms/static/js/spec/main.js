@@ -302,11 +302,11 @@
                 deps: ['backbone']
             },
             'js/groups/models/cohort_discussions': {
-                exports: 'edx.groups.DiscussionTopicsModel',
+                exports: 'edx.groups.DiscussionTopicsSettingsModel',
                 deps: ['backbone']
             },
             'js/groups/views/cohort_discussions': {
-                exports: 'edx.groups.CohortDiscussionsView',
+                exports: 'edx.groups.CohortDiscussionConfigurationView',
                 deps: ['backbone']
             },
             'js/groups/views/cohort_discussions_course_wide': {
@@ -315,7 +315,7 @@
             },
             'js/groups/views/cohort_discussions_inline': {
                 exports: 'edx.groups.InlineDiscussionsView',
-                deps: ['backbone', 'js/groups/views/cohort_discussions']
+                deps: ['backbone', 'js/groups/views/cohort_discussions', 'js/vendor/jquery.qubit']
             },
             'js/groups/views/course_cohort_settings_notification': {
                 exports: 'edx.groups.CourseCohortSettingsNotificationView',

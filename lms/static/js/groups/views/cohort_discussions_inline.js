@@ -1,11 +1,11 @@
 var edx = edx || {};
 
-(function ($, _, Backbone, gettext, interpolate_text, CohortDiscussionsView) {
+(function ($, _, Backbone, gettext, interpolate_text, CohortDiscussionConfigurationView) {
     'use strict';
 
     edx.groups = edx.groups || {};
 
-    edx.groups.InlineDiscussionsView = CohortDiscussionsView.extend({
+    edx.groups.InlineDiscussionsView = CohortDiscussionConfigurationView.extend({
         events: {
             'change .check-discussion-category': 'setSaveButton',
             'change .check-discussion-subcategory-inline': 'setSaveButton',
@@ -22,30 +22,33 @@ var edx = edx || {};
         render: function () {
             var alwaysCohortInlineDiscussions = this.cohortSettings.get('always_cohort_inline_discussions');
 
-            this.$('.cohort-inline-discussions-nav').html(this.template({
-                inlineDiscussionTopics: this.getInlineDiscussionsHtml(this.model.get('inline_discussions')),
-                alwaysCohortInlineDiscussions:alwaysCohortInlineDiscussions
-            }));
+            if (this.model.get('inline_discussions').children.length) {
+                this.$('.cohort-inline-discussions-nav').html(this.template({
+                    inlineDiscussionTopics: this.getInlineDiscussionsHtml(this.model.get('inline_discussions')),
+                    alwaysCohortInlineDiscussions:alwaysCohortInlineDiscussions
+                }));
+            } else {
+                this.showMessage(
+                    gettext('No content-specific discussion topics exist.'),
+                    this.$('.cohort-inline-discussions-nav'),
+                    'warning'
+                );
+            }
 
             // Provides the semantics for a nested list of tri-state checkboxes.
             // When attached to a jQuery element it listens for change events to
             // input[type=checkbox] elements, and updates the checked and indeterminate
             // based on the checked values of any checkboxes in child elements of the DOM.
-            $('ul.inline-topics').qubit();
+            this.$('ul.inline-topics').qubit();
 
             this.setElementsEnabled(alwaysCohortInlineDiscussions, true);
         },
 
         /**
-         Returns the html list for inline discussion topics.
-
-         Args:
-            inlineDiscussions (object): inline discussions object from server
-                with attributes 'entries', 'children' & 'subcategories'.
-
-         Returns:
-            HTML list for inline discussion topics.
-        **/
+         * Generate html list for inline discussion topics.
+         * @params {object} inlineDiscussions - inline discussions object from server.
+         * @returns {Array} - HTML for inline discussion topics.
+         */
         getInlineDiscussionsHtml: function (inlineDiscussions) {
             var categoryTemplate = _.template($('#cohort-discussions-category-tpl').html()),
                 entryTemplate = _.template($('#cohort-discussions-subcategory-tpl').html()),
@@ -76,37 +79,35 @@ var edx = edx || {};
         },
 
         /**
-         Disables the discussion category checkboxes.
-         Disables the discussion sub-category checkboxes.
-         Enables the save button for inline discussion topics.
-        **/
+         * Enable/Disable the inline discussion elements.
+         *
+         * Disables the category and sub-category checkboxes.
+         * Enables the save button.
+         */
         setAllInlineDiscussions: function(event) {
             event.preventDefault();
             this.setElementsEnabled(($(event.currentTarget).prop('checked')), false);
         },
 
         /**
-         Enables the discussion category checkboxes.
-         Enables the discussion sub-category checkboxes.
-         Enables the save button for inline discussion topics.
-
-         Args:
-            disable (Bool): The flag to enable/disable the elements.
-        **/
+         * Enables the inline discussion elements.
+         *
+         * Enables the category and sub-category checkboxes.
+         * Enables the save button.
+         */
         setSomeInlineDiscussions: function(event) {
             event.preventDefault();
             this.setElementsEnabled(!($(event.currentTarget).prop('checked')), false);
         },
 
         /**
-         Enable/Disable the discussion category checkboxes.
-         Enable/Disable the discussion sub-category checkboxes.
-         Enable/Disable the save button for inline discussion topics.
-
-         Args:
-            enable_checkboxes (Bool): The flag to enable/disable the checkboxes.
-            enable_save_button (Bool): The flag to enable/disable the save button.
-        **/
+         * Enable/Disable the inline discussion elements.
+         *
+         * Enable/Disable the category and sub-category checkboxes.
+         * Enable/Disable the save button.
+         * @param {bool} enable_checkboxes - The flag to enable/disable the checkboxes.
+         * @param {bool} enable_save_button - The flag to enable/disable the save button.
+         */
         setElementsEnabled: function(enable_checkboxes, enable_save_button) {
             this.setDisabled(this.$('.check-discussion-category'), enable_checkboxes);
             this.setDisabled(this.$('.check-discussion-subcategory-inline'), enable_checkboxes);
@@ -114,15 +115,15 @@ var edx = edx || {};
         },
 
         /**
-        Enables the save button for inline discussions.
-        **/
+         * Enables the save button for inline discussions.
+         */
         setSaveButton: function(event) {
             this.setDisabled(this.$('.cohort-inline-discussions-form .action-save'), false);
         },
 
         /**
-         Sends the cohorted_inline_discussions to the server and renders the view.
-        **/
+         * Sends the cohorted_inline_discussions to the server and renders the view.
+         */
         saveInlineDiscussionsForm: function (event) {
             event.preventDefault();
 
@@ -137,12 +138,16 @@ var edx = edx || {};
 
             self.saveForm(self.$('.inline-discussion-topics'), fieldData)
                 .done(function () {
-                    self.model.fetch().done(function () {
-                        self.render();
-                        self.showMessage(gettext('Changes Saved.'), self.$('.inline-discussion-topics'));
-                    });
+                    self.model.fetch()
+                        .done(function () {
+                            self.render();
+                            self.showMessage(gettext('Changes Saved.'), self.$('.inline-discussion-topics'));
+                        }).fail(function() {
+                            var errorMessage = gettext("We've encountered an error. Refresh your browser and then try again.");
+                            self.showMessage(errorMessage, self.$('.inline-discussion-topics'), 'error')
+                        });
                 });
         }
 
     });
-}).call(this, $, _, Backbone, gettext, interpolate_text, edx.groups.CohortDiscussionsView);
+}).call(this, $, _, Backbone, gettext, interpolate_text, edx.groups.CohortDiscussionConfigurationView);

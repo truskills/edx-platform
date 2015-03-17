@@ -8,13 +8,13 @@
 
                 var cohorts = new edx.groups.CohortCollection(),
                     courseCohortSettings = new edx.groups.CourseCohortSettingsModel(),
-                    discussionTopics = new edx.groups.DiscussionTopicsModel();
+                    discussionTopicsSettings = new edx.groups.DiscussionTopicsSettingsModel();
 
                 var cohortManagementElement = $('.cohort-management');
 
                 cohorts.url = cohortManagementElement.data('cohorts_url');
                 courseCohortSettings.url = cohortManagementElement.data('course_cohort_settings_url');
-                discussionTopics.url = cohortManagementElement.data('discussion-topics-url');
+                discussionTopicsSettings.url = cohortManagementElement.data('discussion-topics-url');
                 
                 var cohortsView = new edx.groups.CohortsView({
                     el: cohortManagementElement,
@@ -22,7 +22,7 @@
                     contentGroups: contentGroups,
                     cohortSettings: courseCohortSettings,
                     context: {
-                        discussionTopicsModel: discussionTopics,
+                        discussionTopicsSettingsModel: discussionTopicsSettings,
                         uploadCohortsCsvUrl: cohortManagementElement.data('upload_cohorts_csv_url'),
                         studioGroupConfigurationsUrl: studioGroupConfigurationsUrl
                     }
@@ -30,7 +30,7 @@
 
                 cohorts.fetch().done(function() {
                     courseCohortSettings.fetch().done(function() {
-                        discussionTopics.fetch().done(function() {
+                        discussionTopicsSettings.fetch().done(function() {
                             cohortsView.render();
                         });
                     });

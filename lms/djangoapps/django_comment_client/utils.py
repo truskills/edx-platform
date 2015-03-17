@@ -223,8 +223,9 @@ def get_discussion_category_map(course, cohorted_if_in_list=False):
                 node[level]["start_date"] = category_start_date
 
         # pylint: disable=invalid-name
-        always_cohort_inline_discussions = (not cohorted_if_in_list and
-                                            course_cohort_settings.always_cohort_inline_discussions)
+        always_cohort_inline_discussions = (
+            not cohorted_if_in_list and course_cohort_settings.always_cohort_inline_discussions
+        )
         for entry in entries:
             is_entry_cohorted = (
                 course_cohort_settings.is_cohorted and (

@@ -288,14 +288,14 @@ var edx = edx || {};
             if (!this.CourseWideDiscussionsView) {
                 this.CourseWideDiscussionsView = new CourseWideDiscussionsView({
                     el: cohortDiscussionsElement,
-                    model: this.context.discussionTopicsModel,
+                    model: this.context.discussionTopicsSettingsModel,
                     cohortSettings: this.cohortSettings
                 }).render();
             }
             if(!this.InlineDiscussionsView) {
                 this.InlineDiscussionsView = new InlineDiscussionsView({
                     el: cohortDiscussionsElement,
-                    model: this.context.discussionTopicsModel,
+                    model: this.context.discussionTopicsSettingsModel,
                     cohortSettings: this.cohortSettings
                 }).render();
             }
