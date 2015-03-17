@@ -85,8 +85,10 @@ define(["js/views/baseview", "underscore"], function(BaseView, _) {
       render: function() {
           this.$el.html(this.template({
               model: this.model.attributes,
+              licenseString: this.model.toString() || "",
               licenseInfo: this.licenseInfo,
               showPreview: this.showPreview,
+              previewButton: false,
           }));
           return this;
       },
