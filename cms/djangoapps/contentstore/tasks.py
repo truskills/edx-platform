@@ -14,6 +14,10 @@ from course_action_state.models import CourseRerunState
 from contentstore.utils import initialize_permissions
 from opaque_keys.edx.keys import CourseKey
 
+from edxval.api import (
+    rerun_course, ValInternalError
+)
+
 
 @task()
 def rerun_course(source_course_key_string, destination_course_key_string, user_id, fields=None):
@@ -37,6 +41,10 @@ def rerun_course(source_course_key_string, destination_course_key_string, user_i
 
         # update state: Succeeded
         CourseRerunState.objects.succeeded(course_key=destination_course_key)
+
+        # call edxval to attach videos to the rerun
+        rerun_course(source_course_key, destination_course_key)
+
         return "succeeded"
 
     except DuplicateCourseError as exc:

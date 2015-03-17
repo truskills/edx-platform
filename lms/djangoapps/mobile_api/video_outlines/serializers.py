@@ -7,7 +7,7 @@ from xmodule.modulestore.mongo.base import BLOCK_TYPES_WITH_CHILDREN
 from courseware.access import has_access
 
 from edxval.api import (
-    get_video_info_for_course_and_profile, ValInternalError
+    get_video_info_for_course_and_profiles, ValInternalError
 )
 
 
@@ -23,8 +23,8 @@ class BlockOutline(object):
         self.request = request  # needed for making full URLS
         self.local_cache = {}
         try:
-            self.local_cache['course_videos'] = get_video_info_for_course_and_profile(
-                unicode(course_id), "mobile_low"
+            self.local_cache['course_videos'] = get_video_info_for_course_and_profiles(
+                unicode(course_id), ["mobile_low", "mobile_high"]
             )
         except ValInternalError:  # pragma: nocover
             self.local_cache['course_videos'] = {}
@@ -181,8 +181,8 @@ def video_summary(course, course_id, video_descriptor, request, local_cache):
     """
     # First try to check VAL for the URLs we want.
     val_video_info = local_cache['course_videos'].get(video_descriptor.edx_video_id, {})
-    if val_video_info:
-        video_url = val_video_info['url']
+    if val_video_info and val_video_info.get('mobile_low'):
+        video_url = val_video_info['mobile_low']['url']
     # Then fall back to VideoDescriptor fields for video URLs
     elif video_descriptor.html5_sources:
         video_url = video_descriptor.html5_sources[0]
@@ -190,8 +190,12 @@ def video_summary(course, course_id, video_descriptor, request, local_cache):
         video_url = video_descriptor.source
 
     # If we have the video information from VAL, we also have duration and size.
-    duration = val_video_info.get('duration', None)
-    size = val_video_info.get('file_size', 0)
+    if val_video_info.get('mobile_low'):
+        duration = val_video_info["mobile_low"].get('duration', None)
+        size = val_video_info["mobile_low"].get('file_size', 0)
+    else:
+        duration = None
+        size = 0
 
     # Transcripts...
     transcript_langs = video_descriptor.available_translations(verify_assets=False)
@@ -219,4 +223,5 @@ def video_summary(course, course_id, video_descriptor, request, local_cache):
         "language": video_descriptor.get_default_transcript_language(),
         "category": video_descriptor.category,
         "id": unicode(video_descriptor.scope_ids.usage_id),
+        "encoded_videos": val_video_info
     }

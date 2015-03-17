@@ -64,6 +64,7 @@ class TestVideoAPITestCase(MobileAPITestCase):
         self.edx_video_id = 'testing-123'
 
         self.video_url = 'http://val.edx.org/val/video.mp4'
+        self.video_url_high = 'http://val.edx.org/val/video_high.mp4'
         self.html5_video_url = 'http://video.edx.org/html5/video.mp4'
 
         api.create_profile({
@@ -71,6 +72,12 @@ class TestVideoAPITestCase(MobileAPITestCase):
             'extension': 'mp4',
             'width': 1280,
             'height': 720
+        })
+        api.create_profile({
+            'profile_name': 'mobile_high',
+            'extension': 'mp4',
+            'width': 750,
+            'height': 590
         })
         api.create_profile({
             'profile_name': 'mobile_low',
@@ -98,7 +105,14 @@ class TestVideoAPITestCase(MobileAPITestCase):
                     'url': self.video_url,
                     'file_size': 12345,
                     'bitrate': 250
-                }
+                },
+                {
+                    'profile': 'mobile_high',
+                    'url': self.video_url_high,
+                    'file_size': 99999,
+                    'bitrate': 250
+                },
+
             ]})
 
     def _create_video_with_subs(self, custom_subid=None):
@@ -399,7 +413,6 @@ class TestVideoSummaryList(TestVideoAPITestCase, MobileAuthTestMixin, MobileEnro
         self.assertEqual(course_outline[1]['summary']['size'], 0)
         self.assertEqual(course_outline[1]['path'][2]['name'], self.other_unit.display_name)
         self.assertEqual(course_outline[1]['path'][2]['id'], unicode(self.other_unit.location))
-
         self.assertEqual(course_outline[2]['summary']['video_url'], self.html5_video_url)
         self.assertEqual(course_outline[2]['summary']['size'], 0)
 
