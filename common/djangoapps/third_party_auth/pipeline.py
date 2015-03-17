@@ -72,6 +72,7 @@ from django.shortcuts import redirect
 from social.apps.django_app.default import models
 from social.exceptions import AuthException
 from social.pipeline import partial
+from social.pipeline.social_auth import associate_by_email
 
 import student
 from embargo import api as embargo_api
@@ -704,11 +705,34 @@ def change_enrollment(strategy, user=None, is_dashboard=False, *args, **kwargs):
             except (
                 CourseDoesNotExistException,
                 ItemAlreadyInCartException,
-                AlreadyEnrolledInCourseException
+                AlreadyEnrolledInCourseException,
             ):
                 pass
             # It's more important to complete login than to
             # ensure that the course was added to the shopping cart.
             # Log errors, but don't stop the authentication pipeline.
-            except Exception as ex:
+            except Exception as ex:  # pylint: disable=broad-except
                 logger.exception(ex)
+
+
+@partial.partial
+def associate_by_email_if_login_api(auth_entry, strategy, details, user, *args, **kwargs):
+    """
+    This pipeline step associates the current social auth with the user with the
+    same email address in the database.  It defers to the social library's associate_by_email
+    implementation, which verifies that only a single database user is associated with the email.
+
+    This association is done ONLY if the user entered the pipeline through a LOGIN API.
+    """
+    if auth_entry == AUTH_ENTRY_LOGIN_API:
+        association_response = associate_by_email(strategy, details, user, *args, **kwargs)
+        if (
+            association_response and
+            association_response.get('user') and
+            association_response['user'].is_active
+        ):
+            # Only return the user matched by email if their email has been activated.
+            # Otherwise, an illegitimate user can create an account with another user's
+            # email address and the legitimate user would now login to the illegitimate
+            # account.
+            return association_response
