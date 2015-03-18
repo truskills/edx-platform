@@ -934,7 +934,7 @@ class MongoModuleStore(ModuleStoreDraftAndPublished, ModuleStoreWriteBase, Mongo
                 course_key,
                 item,
                 data_cache,
-                using_descriptor_system=using_descriptor_system
+                using_descriptor_system=using_descriptor_system,
                 apply_cached_metadata=self._should_apply_cached_metadata(item, depth)
             )
             for item in items
