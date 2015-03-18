@@ -1,13 +1,10 @@
-.. _edX Enrollment API Endpoints:
-
 ################################################
-edX Enrollment API Endpoints
+edX Platform User API Endpoints
 ################################################
 
-The edX Platform API allows you to view information about users and their course enrollments, course information, and videos and transcripts.
+The edX Platform User API enables you to view information about users update your own account.
 
 The following tasks and endpoints are currently supported. 
-
 
 .. list-table::
    :widths: 10 70
@@ -15,11 +12,10 @@ The following tasks and endpoints are currently supported.
 
    * - To:
      - Use this endpoint:
-   * - :ref:`Get the user's enrollment status in a course <Get the Users Enrollment Status in a Course>`
-     - /api/enrollment/v1/enrollment/{user_id},{course_id}
-   * - :ref:`Get enrollment details for a course<Get Enrollment Details for a Course>`
-     - /api/enrollment/v1/course/{course_id}
-   * - :ref:`View a user's enrollments <View and add to a Users Course Enrollments>`
-     - /api/enrollment/v1/enrollment
-   * - :ref:`Enroll a user in a course <View and add to a Users Course Enrollments>`
-     - /api/enrollment/v1/enrollment{“course_details”:{“course_id”:“*course_id*”}}
+   * - :ref:`Get a user's account information <Get and Update the User's
+       Account Information>`
+     - GET /api/user/v0/accounts/{username}/[?view=shared]
+   * - :ref:`Update your account information <Get and Update the User's Account
+       Information>`
+     - PATCH /api/user/v0/accounts/{username}/{“key”:”value”} “application
+       /merge-patch+json”

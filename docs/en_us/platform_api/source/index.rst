@@ -9,6 +9,7 @@ edX Platform APIs
     read_me
     preface
     change_log
+    overview
     authentication
     mobile/index
     enrollment/index

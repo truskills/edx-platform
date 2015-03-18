@@ -1,15 +1,18 @@
 ##################################################
-Accounts API Module
+edX Platform Accounts API Module
 ##################################################
  
 .. module:: accounts
 
 This page contains information on using the User Accounts API to:
 
+* `Get and Update the User's Account Information`_
 
-********************************************
-Get the User's Account Information
-********************************************
+.. _Get and Update the User's Account Information:
+
+**********************************************
+Get and Update the User's Account Information
+**********************************************
 
 .. autoclass:: accounts.views.AccountView
 
@@ -17,4 +20,21 @@ Get the User's Account Information
 
 .. code-block:: json
 
-    TBP 
+    HTTP 200 OK
+    Content-Type: application/json
+    Vary: Accept
+    Allow: GET, HEAD, OPTIONS, PATCH
+
+    {
+      "username": "John", 
+      "name": "John Doe", 
+      "language": "", 
+      "gender": "m", 
+      "year_of_birth": 2007, 
+      "level_of_education": "m", 
+      "goals": "Professional Development", 
+      "country": US, 
+      "mailing_address": "406 Highland Ave., Somerville, MA 02144", 
+      "email": "johndoe@company.com", 
+      "date_joined": "2015-03-18T13:42:40Z"
+    } 

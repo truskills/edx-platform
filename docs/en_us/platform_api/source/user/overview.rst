@@ -1,37 +1,28 @@
-
-
 ################################################
-edX Enrollment API Overview
+edX Platform User API Overview
 ################################################
 
-The edX Enrollment API enables you to view user and course enrollment
-information, and to enroll a user in a course.
+The edX Platform User API enables you to view and update account information.
 
-The edX Platform API uses Representational State Transfer (REST) design
+The edX Platform User API uses Representational State Transfer (REST) design
 principles and supports the JavaScript Object Notation (JSON) data-interchange
 format. Our REST API is simple, lightweight and optimized.
 
-You can use the edX Enrollment API for web, desktop, and mobile applications. 
+You can use the edX Platform User API for web, desktop, and mobile
+applications.
 
 *************************************
-edX Enrollment API Version 1
+edX Platform User API Version 1
 *************************************
 
-The edX Enrollment API is currently at version 1.0. We plan on making
+The edX latform User API is currently at version 0. We plan on making
 significant enhancements to this API.
 
-********************************
-edX Enrollment API Capabilities
-********************************
+**********************************************
+edX Platform User Enrollment API Capabilities
+**********************************************
 
-With the edX Enrollment API, you can:
+With the edX Platform User API, you can:
 
-* :ref:`Get the user's enrollment status in a Course <Get the Users Enrollment
-  Status in a Course>`
-
-* :ref:`Get enrollment details for a course<Get Enrollment Details for a
-  Course>`
-
-* :ref:`View a user's enrollments <View and add to a Users Course Enrollments>`
-
-* :ref:`Enroll a user in a course <View and add to a Users Course Enrollments>`
+* :ref:`Get and update the users' account information <Get and Update the
+  User's Account Information>`

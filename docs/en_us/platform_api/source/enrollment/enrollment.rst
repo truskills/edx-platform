@@ -4,7 +4,7 @@ Enrollment API Module
  
 .. module:: enrollment
 
-This page contains information on using the Enrollment API to:
+This page contains information on using the Platform Enrollment API to:
 
 * :ref:`Get the user's enrollment status in a course <Get the Users Enrollment Status in a Course>`
 * :ref:`Get enrollment details for a course<Get Enrollment Details for a Course>`

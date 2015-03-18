@@ -4,7 +4,7 @@ Video Outlines Mobile API Module
 
 .. module:: mobile_api
 
-This page contains docstrings and example responses for:
+This page describes how to use the platform mobile video outline API to:
 
 * `Get the Video List`_
 * `Get a Video Transcript`_

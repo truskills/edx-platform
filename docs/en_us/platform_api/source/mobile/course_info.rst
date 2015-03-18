@@ -1,10 +1,10 @@
 ##################################################
-Course Information Mobile API Module
+Platform Mobile Course Information API Module
 ##################################################
 
 .. module:: mobile_api
 
-This page contains docstrings and example responses for:
+This page describes how to use the platform mobile course information API to:
 
 * `Get Course Updates`_
 * `Get Course Handouts`_

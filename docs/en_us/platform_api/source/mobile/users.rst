@@ -1,10 +1,10 @@
-#########################
-User Mobile API Module
-#########################
+################################
+Platform Mobile User API Module
+################################
 
 .. module:: mobile_api
 
-This page describes how to use the mobile user API to:
+This page describes how to use the platform mobile user API to:
 
 * `Get User Details`_
 * `Get a User's Course Enrollments`_
