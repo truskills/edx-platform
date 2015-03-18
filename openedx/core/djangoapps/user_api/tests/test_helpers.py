@@ -7,11 +7,11 @@ import ddt
 from django.http import HttpRequest, HttpResponse
 from django.test import TestCase
 from nose.tools import raises
+
 from ..helpers import (
     intercept_errors, shim_student_view,
     FormDescription, InvalidFieldError
 )
-
 
 class FakeInputException(Exception):
     """Fake exception that should be intercepted."""

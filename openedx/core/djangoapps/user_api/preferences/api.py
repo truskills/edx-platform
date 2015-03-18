@@ -1,20 +1,15 @@
 """
 API for managing user preferences.
 """
-import datetime
 import logging
-import string
 import analytics
 from eventtracking import tracker
-from pytz import UTC
 
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction, IntegrityError
 from django.utils.translation import ugettext as _
-
-from student.models import UserProfile
+from student.models import User, UserProfile
 
 from ..errors import (
     UserAPIInternalError, UserAPIRequestError, UserNotFound, UserNotAuthorized,
@@ -235,33 +230,28 @@ def update_email_opt_in(user, org, optin):
     Returns:
         None
 
+    Raises:
+         UserNotFound: no user profile exists for the specified user.
     """
-    # Avoid calling get_account_settings because it introduces circularity for many callers who need both
-    # preferences and account information.
     try:
         user_profile = UserProfile.objects.get(user=user)
     except ObjectDoesNotExist:
         raise UserNotFound()
-
-    year_of_birth = user_profile.year_of_birth
-    of_age = (
-        year_of_birth is None or  # If year of birth is not set, we assume user is of age.
-        datetime.datetime.now(UTC).year - year_of_birth >  # pylint: disable=maybe-no-member
-        getattr(settings, 'EMAIL_OPTIN_MINIMUM_AGE', 13)
+    preference, _ = UserOrgTag.objects.get_or_create(
+        user=user, org=org, key='email-optin'
     )
-
+    user_requires_parental_consent = user_profile.requires_parental_consent(
+        age_limit=getattr(settings, 'EMAIL_OPTIN_MINIMUM_AGE', 13),
+        default_requires_consent=False,
+    )
+    preference.value = str(optin and not user_requires_parental_consent)
     try:
-        preference, _ = UserOrgTag.objects.get_or_create(
-            user=user, org=org, key='email-optin'
-        )
-        preference.value = str(optin and of_age)
         preference.save()
-
-        if settings.FEATURES.get('SEGMENT_IO_LMS') and settings.SEGMENT_IO_LMS_KEY:
-            _track_update_email_opt_in(user.id, org, optin)
-
     except IntegrityError as err:
         log.warn(u"Could not update organization wide preference due to IntegrityError: {}".format(err.message))
+    if settings.FEATURES.get('SEGMENT_IO_LMS') and settings.SEGMENT_IO_LMS_KEY:
+        _track_update_email_opt_in(user.id, org, optin)
+
 
 
 def _track_update_email_opt_in(user_id, organization, opt_in):

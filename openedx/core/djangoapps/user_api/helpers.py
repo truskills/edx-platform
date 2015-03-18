@@ -4,10 +4,17 @@ This is NOT part of the public API.
 """
 from collections import defaultdict
 from functools import wraps
+from pytz import UTC
+import datetime
 import logging
 import json
-from django.http import HttpResponseBadRequest
 
+from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import HttpResponseBadRequest
+from student.models import UserProfile
+
+from .errors import UserNotFound
 
 LOGGER = logging.getLogger(__name__)
 
