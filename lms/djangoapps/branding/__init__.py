@@ -13,7 +13,7 @@ def get_visible_courses():
 
     filtered_by_org = microsite.get_value('course_org_filter')
 
-    _courses = modulestore().get_courses(course_org_filter=filtered_by_org)
+    _courses = modulestore().get_courses(org=filtered_by_org)
 
     courses = [c for c in _courses
                if isinstance(c, CourseDescriptor)]

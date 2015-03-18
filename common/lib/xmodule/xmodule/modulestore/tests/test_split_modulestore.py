@@ -617,6 +617,23 @@ class SplitModuleCourseTests(SplitModuleTest):
         self.assertEqual(course.edited_by, "testassist@edx.org")
         self.assertDictEqual(course.grade_cutoffs, {"Pass": 0.45})
 
+    def test_get_org_courses(self):
+        courses = modulestore().get_courses(branch=BRANCH_NAME_DRAFT, org='guestx')
+
+        # should have gotten 1 draft courses
+        self.assertEqual(len(courses), 1)
+
+        courses = modulestore().get_courses(branch=BRANCH_NAME_DRAFT, org='testx')
+
+        # should have gotten 2 draft courses
+        self.assertEqual(len(courses), 2)
+
+        # although this is already covered in other tests, let's
+        # also not pass in org= parameter to make sure we get back
+        # 3 courses
+        courses = modulestore().get_courses(branch=BRANCH_NAME_DRAFT)
+        self.assertEqual(len(courses), 3)
+
     def test_branch_requests(self):
         # query w/ branch qualifier (both draft and published)
         def _verify_published_course(courses_published):

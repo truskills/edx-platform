@@ -145,6 +145,18 @@ class TestMongoModuleStoreBase(unittest.TestCase):
             verbose=True
         )
 
+        # also import a course under a different course_id (especially ORG)
+        import_course_from_xml(
+            draft_store,
+            999,
+            DATA_DIR,
+            ['test_import_course'],
+            static_content_store=content_store,
+            do_import_static=False,
+            verbose=True,
+            target_id=SlashSeparatedCourseKey('guestx', 'foo', 'bar')
+        )
+
         return content_store, draft_store
 
     @staticmethod
@@ -199,7 +211,7 @@ class TestMongoModuleStore(TestMongoModuleStoreBase):
             for fields in [
                 ['edX', 'simple', '2012_Fall'], ['edX', 'simple_with_draft', '2012_Fall'],
                 ['edX', 'test_import_course', '2012_Fall'], ['edX', 'test_unicode', '2012_Fall'],
-                ['edX', 'toy', '2012_Fall']
+                ['edX', 'toy', '2012_Fall'], ['guestx', 'foo', 'bar']
             ]
         ]:
             assert_in(course_key, course_ids)
@@ -211,6 +223,37 @@ class TestMongoModuleStore(TestMongoModuleStoreBase):
             )
             assert_false(self.draft_store.has_course(mix_cased))
             assert_true(self.draft_store.has_course(mix_cased, ignore_case=True))
+
+    def test_get_org_courses(self):
+        """
+        Make sure that we can query for a filtered list of courses for a given ORG
+        """
+
+        courses = self.draft_store.get_courses(org='guestx')
+        assert_equals(len(courses), 1)
+        course_ids = [course.id for course in courses]
+
+        for course_key in [
+            SlashSeparatedCourseKey(*fields)
+            for fields in [
+                ['guestx', 'foo', 'bar']
+            ]
+        ]:
+            assert_in(course_key, course_ids)
+
+        courses = self.draft_store.get_courses(org='edX')
+        assert_equals(len(courses), 5)
+        course_ids = [course.id for course in courses]
+
+        for course_key in [
+            SlashSeparatedCourseKey(*fields)
+            for fields in [
+                ['edX', 'simple', '2012_Fall'], ['edX', 'simple_with_draft', '2012_Fall'],
+                ['edX', 'test_import_course', '2012_Fall'], ['edX', 'test_unicode', '2012_Fall'],
+                ['edX', 'toy', '2012_Fall']
+            ]
+        ]:
+            assert_in(course_key, course_ids)
 
     def test_no_such_course(self):
         """

@@ -954,10 +954,11 @@ class MongoModuleStore(ModuleStoreDraftAndPublished, ModuleStoreWriteBase, Mongo
     @autoretry_read()
     def get_courses(self, **kwargs):
         '''
-        Returns a list of course descriptors.
+        Returns a list of course descriptors. This accepts an optional parameter of 'org' which
+        will apply an efficient filter to only get courses with the specified ORG
         '''
 
-        course_org_filter = kwargs.get('course_org_filter')
+        course_org_filter = kwargs.get('org')
 
         if course_org_filter:
             course_records = self.collection.find({'_id.category': 'course', '_id.org': course_org_filter})
