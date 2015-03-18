@@ -74,6 +74,7 @@ BLOCK_TYPES_WITH_CHILDREN = list(set(
 # at module level, cache one instance of OSFS per filesystem root.
 _OSFS_INSTANCE = {}
 
+_DETACHED_CATEGORIES = [name for name, __ in XBlock.load_tagged_classes("detached")]
 
 class MongoRevisionKey(object):
     """
@@ -583,8 +584,6 @@ class MongoModuleStore(ModuleStoreDraftAndPublished, ModuleStoreWriteBase, Mongo
         self._course_run_cache = {}
         self.signal_handler = signal_handler
 
-        self.detached_categories = [name for name, __ in XBlock.load_tagged_classes("detached")]
-
     def close_connections(self):
         """
         Closes any open connections to the underlying database
@@ -947,7 +946,7 @@ class MongoModuleStore(ModuleStoreDraftAndPublished, ModuleStoreWriteBase, Mongo
         of inherited metadata onto the item
         """
         category = item['location']['category']
-        apply_cached_metadata = category not in self.detached_categories and \
+        apply_cached_metadata = category not in _DETACHED_CATEGORIES and \
             not (category == 'course' and depth == 0)
         return apply_cached_metadata
 
