@@ -110,6 +110,7 @@ def wrap_xblock(runtime_class, block, view, frag, context, usage_id_serializer, 
         'display_name': block.display_name_with_default,
         'data_attributes': u' '.join(u'data-{}="{}"'.format(markupsafe.escape(key), markupsafe.escape(value))
                                      for key, value in data.iteritems()),
+        'license': getattr(block, "license", None),
     }
 
     if hasattr(frag, 'json_init_args') and frag.json_init_args is not None:

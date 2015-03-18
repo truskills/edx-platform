@@ -50,6 +50,27 @@ div.course-wrapper {
     width: 100%
   }
 
+  .xblock-license {
+    text-align: $bi-app-right;
+    border-top: 1px solid $gray-l3;
+    margin: 0 15px;
+    padding: 5px;
+    font-size: 80%;
+
+    &, a, span {
+      color: $gray-l3;
+    }
+  }
+
+  .xmodule_display .xblock-license,
+  .xmodule_display .xblock-license a {
+    color: $gray-l3;
+  }
+
+  .xmodule_VideoModule .xblock-license {
+    border: 0;
+  }
+
   section.course-content {
     @extend .content;
     padding: 40px;
