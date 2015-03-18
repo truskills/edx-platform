@@ -641,7 +641,7 @@ class TestHtmlModifiers(ModuleStoreTestCase):
 
     def test_course_image_for_split_course(self):
         """
-        if course image is empty the course_image_url will be empty
+        if course_image is empty the course_image_url will be blank
         """
         migrator = SplitMigrator(
             source_modulestore=modulestore(),
