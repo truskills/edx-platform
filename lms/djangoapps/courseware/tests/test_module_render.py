@@ -40,6 +40,7 @@ from xmodule.lti_module import LTIDescriptor
 
 from xmodule.modulestore import ModuleStoreEnum
 from xmodule.modulestore.django import modulestore
+from xmodule.modulestore.split_migrator import SplitMigrator
 from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase
 from xmodule.modulestore.tests.factories import ItemFactory, CourseFactory, check_mongo_calls
 from xmodule.x_module import XModuleDescriptor, XModule, STUDENT_VIEW, CombinedSystem
@@ -637,6 +638,28 @@ class TestHtmlModifiers(ModuleStoreTestCase):
         url = course_image_url(self.course)
         self.assertTrue(url.startswith('/static/toy_course_dir/'))
         self.course.static_asset_path = ""
+
+    def test_course_image_for_split_course(self):
+        """
+        if course image is empty the course_image_url will be empty
+        """
+        migrator = SplitMigrator(
+            source_modulestore=modulestore(),
+            split_modulestore=modulestore()._get_modulestore_by_type(ModuleStoreEnum.Type.split),
+        )
+        course_key = SlashSeparatedCourseKey(self.course.id.org,
+                                             self.course.id.course,
+                                             self.course.id.run)
+        migrator.migrate_mongo_course(course_key,
+                                      self.user.id,
+                                      "test_org", "test_course", "test_run")
+        split_store = modulestore()._get_modulestore_by_type(ModuleStoreEnum.Type.split)
+        locator = split_store.make_course_key("test_org", "test_course", "test_run")
+        course_from_split = modulestore().get_course(locator)
+        course_from_split.course_image = ''
+
+        url = course_image_url(course_from_split)
+        self.assertEqual('', url)
 
     def test_get_course_info_section(self):
         self.course.static_asset_path = "toy_course_dir"
