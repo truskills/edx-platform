@@ -40,7 +40,6 @@ from xmodule.lti_module import LTIDescriptor
 
 from xmodule.modulestore import ModuleStoreEnum
 from xmodule.modulestore.django import modulestore
-from xmodule.modulestore.split_migrator import SplitMigrator
 from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase
 from xmodule.modulestore.tests.factories import ItemFactory, CourseFactory, check_mongo_calls
 from xmodule.x_module import XModuleDescriptor, XModule, STUDENT_VIEW, CombinedSystem
@@ -529,6 +528,7 @@ class TestTOC(ModuleStoreTestCase):
                 self.assertIn(toc_section, actual)
 
 
+@ddt.ddt
 class TestHtmlModifiers(ModuleStoreTestCase):
     """
     Tests to verify that standard modifications to the output of XModule/XBlock
@@ -639,26 +639,15 @@ class TestHtmlModifiers(ModuleStoreTestCase):
         self.assertTrue(url.startswith('/static/toy_course_dir/'))
         self.course.static_asset_path = ""
 
-    def test_course_image_for_split_course(self):
+    @ddt.data(ModuleStoreEnum.Type.split)
+    def test_course_image_for_split_course(self, store):
         """
-        if course_image is empty the course_image_url will be blank
+        for split courses if course_image is empty then course_image_url will be blank
         """
-        migrator = SplitMigrator(
-            source_modulestore=modulestore(),
-            split_modulestore=modulestore()._get_modulestore_by_type(ModuleStoreEnum.Type.split),
-        )
-        course_key = SlashSeparatedCourseKey(self.course.id.org,
-                                             self.course.id.course,
-                                             self.course.id.run)
-        migrator.migrate_mongo_course(course_key,
-                                      self.user.id,
-                                      "test_org", "test_course", "test_run")
-        split_store = modulestore()._get_modulestore_by_type(ModuleStoreEnum.Type.split)
-        locator = split_store.make_course_key("test_org", "test_course", "test_run")
-        course_from_split = modulestore().get_course(locator)
-        course_from_split.course_image = ''
+        self.course = CourseFactory.create(default_store=store)
+        self.course.course_image = ''
 
-        url = course_image_url(course_from_split)
+        url = course_image_url(self.course)
         self.assertEqual('', url)
 
     def test_get_course_info_section(self):

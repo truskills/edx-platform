@@ -138,10 +138,11 @@ def course_image_url(course):
     else:
         try:
             loc = StaticContent.compute_location(course.location.course_key, course.course_image)
-            url = StaticContent.serialize_asset_key_with_slash(loc)
         except InvalidKeyError:
-            # handler for split courses, if course_image is blank
-            url = ''
+            # return empty url for split course with empty "course_image"
+            return ''
+
+        url = StaticContent.serialize_asset_key_with_slash(loc)
     return url
 
 
