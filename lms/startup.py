@@ -84,7 +84,7 @@ def enable_theme():
 
     # Calculate the location of the theme's files
     print "/////////////////////////////////////////////////////////////////////////////"
-    print "Print ENV_ROOT ===================== %s." & ENV_ROOT
+    print "Print ENV_ROOT ===================== %s." & settings.ENV_ROOT
 
     theme_root = settings.ENV_ROOT / "themes" / settings.THEME_NAME
 
